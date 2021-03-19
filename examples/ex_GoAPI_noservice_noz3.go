@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/marcellop71/mosaic/abe"
 	"github.com/marcellop71/mosaic/abe/log"
+	//"fmt"
 )
 
 func main() {
@@ -13,6 +14,8 @@ func main() {
 	curve.SetSeed(seed).InitRng()
 	org := abe.NewRandomOrg(curve)
 	authkeys := abe.NewRandomAuth(org)
+
+	
 	user := "marcello.paris@gmail.com"
 
 	policies := []string{

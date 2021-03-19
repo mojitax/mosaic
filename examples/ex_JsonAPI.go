@@ -3,7 +3,7 @@ package main
 import (
 	"crypto/sha256"
 	"path/filepath"
-
+	"fmt"
 	"github.com/marcellop71/mosaic/abe"
 	"github.com/marcellop71/mosaic/abe/log"
 	"github.com/marcellop71/mosaic/service"
@@ -39,14 +39,14 @@ func main() {
 
 	policies := []string{
 		"A@auth0",
-		"A@auth0 /\\ B@auth0",
+		/*"A@auth0 /\\ B@auth0",
 		"A@auth0 /\\ A@auth0",
 		"A@auth0 /\\ (B@auth0 /\\ (C@auth0 \\/ D@auth0))",
 		"A@auth0 /\\ ((D@auth0 \\/ (B@auth0 /\\ C@auth0)) \\/ A@auth0)",
 		"(A@auth0 \\/ C@auth0) /\\ (D@auth0 \\/ (B@auth0 /\\ C@auth0))",
 		"(/\\ A@auth0 (\\/ A@auth0 D@auth0 (/\\ B@auth0 C@auth0)))",
 		"(A@auth0 /\\ B@auth0) \\/ (A@auth0 /\\ C@auth0) \\/ (B@auth0 /\\ C@auth0)",
-		"A@auth0 /\\ B@auth0 /\\ C@auth0",
+		"A@auth0 /\\ B@auth0 /\\ C@auth0",*/
 	}
 
 	for _, policy := range policies {
@@ -63,16 +63,17 @@ func main() {
 			authpubsJson := abe.AuthPubsOfPolicyJson(policy)
 			authpubsJson = service.FetchAuthPubs(authpubsJson)
 			secret_enc := abe.EncryptJson(secretJson, policy, authpubsJson)
-
+			
 			// decrypting
 			policy = abe.PolicyOfCiphertextJson(secret_enc)
 			userattrsJson := service.FetchUserAttrs(user)
+			//fmt.Printf("%s", secret_enc)
 			if abe.CheckPolicyJson(policy, userattrsJson) == "sat" {
 				userattrsJson = abe.SelectUserAttrsJson(user, policy, userattrsJson)
 				userattrsJson = service.FetchUserkeys(userattrsJson)
 				secret_dec := abe.DecryptJson(secret_enc, userattrsJson)
 				secret_dec_hash := sha256.Sum256([]byte(secret_dec))
-
+				fmt.Printf("%s", secret_dec_hash)
 				if abe.Encode(string(secret_dec_hash[:])) == abe.Encode(string(secret_hash[:])) {
 					log.Info("secret correctly reconstructed")
 				} else {

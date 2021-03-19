@@ -19,10 +19,10 @@ func (abeStorage StorageLeveldb) Init(config Config) {
   opts := levigo.NewOptions()
   opts.SetCache(levigo.NewLRUCache(3<<30))
   opts.SetCreateIfMissing(true)
-	err = levigo.DestroyDatabase(conf.Name, opts)
+/*	err = levigo.DestroyDatabase(conf.Name, opts)
 	if err != nil {
     log.Info("%s", err)
-  }
+  }*/
   db, err = levigo.Open(conf.Name, opts)
   if err != nil {
     log.Error("%s", err)
