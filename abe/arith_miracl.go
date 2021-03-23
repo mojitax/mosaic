@@ -6,10 +6,10 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"math/big"
-
+	"fmt"
 	core "github.com/marcellop71/mosaic/abe/miracl/core"
-	crv "github.com/marcellop71/mosaic/abe/miracl/core/BN254"
-	//crv "github.com/marcellop71/mosaic/abe/miracl/core/BLS12381"
+	//crv "github.com/marcellop71/mosaic/abe/miracl/core/BN254"
+	crv "github.com/marcellop71/mosaic/abe/miracl/core/BLS12381"
 	//crv "github.com/marcellop71/mosaic/abe/miracl/core/BN462"
 	"github.com/marcellop71/mosaic/abe/log"
 )
@@ -169,15 +169,22 @@ func (curve *MiraclCurve) UnitOnGroup(group string) Point {
 
 // hash to group ("G1", "G2", "GT") in the bilinear pairing
 func (curve *MiraclCurve) HashToGroup(x string, group string) Point {
+	fmt.Printf("\nsuperin\n")
 	hx := sha256.Sum256([]byte(x))
+	fmt.Printf("\nsuperin1\n")
 	p := curve.NewPointOn(group).(*MiraclPoint)
+	fmt.Printf("\nsuperin2 %s\n", hx)
 	switch group {
 	case "G1":
 		p.p1 = crv.Hash_to_point_G1(hx[:])
+		fmt.Printf("\nsuperin3\n")
 	case "G2":
 		p.p2 = crv.Hash_to_point_G2(hx[:])
+		fmt.Printf("\nsuperin4\n")
 	case "GT":
+		fmt.Printf("\nsuperin5\n")
 	}
+	fmt.Printf("\nsuperin6\n")
 	return p
 }
 

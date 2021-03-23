@@ -21,4 +21,5 @@ func main(){
 		service.SetupUserkey(user, attr)
 	}
 
+
 }

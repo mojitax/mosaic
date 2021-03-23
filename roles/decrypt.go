@@ -17,7 +17,7 @@ func main(){
 	service.InitAbeService(config, nil)
 
 	user := "marcello.paris@gmail.com"
-	file, _ := os.Open("files/ciphertext")
+	file, _ := os.Open("files/ciphertext2")
     reader := bufio.NewReader(file)
 	line, _ :=reader.ReadString('\n')
 	secret_enc:=line
@@ -29,6 +29,7 @@ func main(){
 		userattrsJson = service.FetchUserkeys(userattrsJson)
 		secret_dec := abe.DecryptJson(secret_enc, userattrsJson)
 		secret_dec_hash := sha256.Sum256([]byte(secret_dec))
+		fmt.Printf("\n%s\n", userattrsJson)
 		fmt.Printf("%s", secret_dec_hash)
 	}
 

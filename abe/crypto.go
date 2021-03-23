@@ -4,7 +4,7 @@ import (
 	"crypto/sha256"
 	"math/big"
 	"strings"
-
+	"fmt"
 	"github.com/marcellop71/mosaic/abe/log"
 )
 
@@ -172,10 +172,14 @@ func EncryptJson(secretJson string, policy string, authpubsJson string) string {
 // the function requires the list of user attributes to use
 // and the corresponding collection of userkey
 func Decrypt(ct *Ciphertext, userattrs *UserAttrs) (secret Point) {
+	
 	org := ct.Org
+	fmt.Printf("\ninside\n")
 	curve := org.Crv
+	fmt.Printf("\ninside2\n")
+	fmt.Printf("\n%s\n", curve)
 	huser := curve.HashToGroup(userattrs.User, "G2")
-
+	fmt.Printf("\ninside3\n")
 	S0 := curve.UnitOnGroup("GT")
 	for attr, cs := range userattrs.Coeff {
 		for k, c := range cs {
@@ -197,9 +201,13 @@ func Decrypt(ct *Ciphertext, userattrs *UserAttrs) (secret Point) {
 
 // Json API for Decrypt
 func DecryptJson(ctJson string, userattrsJson string) string {
+	fmt.Printf("\noutside\n")
 	ct := NewCiphertextOfJsonStr(ctJson).OfJsonObj()
+	fmt.Printf("\noutside1\n")
 	userattrs := NewUserAttrsOfJsonStr(userattrsJson).OfJsonObj()
+	fmt.Printf("\noutside2\n")
 	secret := Decrypt(ct, userattrs)
+	fmt.Printf("\noutside3\n")
 	return secret.ToJsonObj().GetP()
 }
 
