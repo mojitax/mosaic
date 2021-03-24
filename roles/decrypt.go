@@ -18,6 +18,7 @@ func main(){
 
 	user := "marcello.paris@gmail.com"
 	file, _ := os.Open("files/ciphertext2")
+	
     reader := bufio.NewReader(file)
 	line, _ :=reader.ReadString('\n')
 	secret_enc:=line
@@ -27,10 +28,12 @@ func main(){
 	if abe.CheckPolicyJson(policy, userattrsJson) == "sat" {
 		userattrsJson = abe.SelectUserAttrsJson(user, policy, userattrsJson)
 		userattrsJson = service.FetchUserkeys(userattrsJson)
+		file2, _ := os.Create("files/userattrs")
+		file2.WriteString(userattrsJson)
 		secret_dec := abe.DecryptJson(secret_enc, userattrsJson)
 		secret_dec_hash := sha256.Sum256([]byte(secret_dec))
 		fmt.Printf("\n%s\n", userattrsJson)
-		fmt.Printf("%s", secret_dec_hash)
+		fmt.Printf("%s", abe.Encode(string(secret_dec_hash[:])))
 	}
 
 }	
