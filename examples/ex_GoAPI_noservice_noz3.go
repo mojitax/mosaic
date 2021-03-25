@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/marcellop71/mosaic/abe"
 	"github.com/marcellop71/mosaic/abe/log"
-	//"fmt"
+	"fmt"
 )
 
 func main() {
@@ -14,20 +14,20 @@ func main() {
 	curve.SetSeed(seed).InitRng()
 	org := abe.NewRandomOrg(curve)
 	authkeys := abe.NewRandomAuth(org)
-
+	org.ToJsonObj()
 	
 	user := "marcello.paris@gmail.com"
 
 	policies := []string{
 		"A@auth0",
-		"A@auth0 /\\ B@auth0",
-		"A@auth0 /\\ A@auth0",
-		"A@auth0 /\\ (B@auth0 /\\ (C@auth0 \\/ D@auth0))",
-		"A@auth0 /\\ ((D@auth0 \\/ (B@auth0 /\\ C@auth0)) \\/ A@auth0)",
-		"(A@auth0 \\/ C@auth0) /\\ (D@auth0 \\/ (B@auth0 /\\ C@auth0))",
-		"(/\\ A@auth0 (\\/ A@auth0 D@auth0 (/\\ B@auth0 C@auth0)))",
-		"(A@auth0 /\\ B@auth0) \\/ (A@auth0 /\\ C@auth0) \\/ (B@auth0 /\\ C@auth0)",
-		"A@auth0 /\\ B@auth0 /\\ C@auth0",
+		//"A@auth0 /\\ B@auth0",
+		//"A@auth0 /\\ A@auth0",
+		//"A@auth0 /\\ (B@auth0 /\\ (C@auth0 \\/ D@auth0))",
+		//"A@auth0 /\\ ((D@auth0 \\/ (B@auth0 /\\ C@auth0)) \\/ A@auth0)",
+		//"(A@auth0 \\/ C@auth0) /\\ (D@auth0 \\/ (B@auth0 /\\ C@auth0))",
+		//"(/\\ A@auth0 (\\/ A@auth0 D@auth0 (/\\ B@auth0 C@auth0)))",
+		//"(A@auth0 /\\ B@auth0) \\/ (A@auth0 /\\ C@auth0) \\/ (B@auth0 /\\ C@auth0)",
+		//"A@auth0 /\\ B@auth0 /\\ C@auth0",
 	}
 
 	for _, policy := range policies {
@@ -41,12 +41,14 @@ func main() {
 		for attr, _ := range authpubs.AuthPub {
 			authpubs.AuthPub[attr] = authkeys.AuthPub
 		}
+		fmt.Printf("%s\n", authpubs)
 		ct := abe.Encrypt(secret, policy, authpubs)
 
 		// decrypting
 		userattrs_A := abe.NewRandomUserkey(user, "A@auth0", authkeys.AuthPrv)
 		userattrs_B := abe.NewRandomUserkey(user, "B@auth0", authkeys.AuthPrv)
 		userattrs := userattrs_A.Add(userattrs_B)
+		//fmt.Printf("%s", userattrs)
 		userattrs.SelectUserAttrs(user, policy)
 
 		secret_dec := abe.Decrypt(ct, userattrs)
