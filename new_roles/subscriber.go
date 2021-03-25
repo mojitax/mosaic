@@ -15,9 +15,8 @@ import (
 
 func main() {
 
-
-
-        // 1 - Read a client identifier from a command line flag
+        //tu filozofii nie ma - odbiera z brokera stringa i zapisuje do pliku ciphertext.json
+        //wszystko jak w przykładzie
         var clientName string
         flag.StringVar(&clientName, "client", "", "the client name")
         flag.Parse()
@@ -26,7 +25,6 @@ func main() {
                 panic("-client is required")
         }
 
-        // 2 - Connect to a MQTT broker 
         brokerEndpoint := "18.221.34.191:1883"
         mqttClient, err := initMQTT(brokerEndpoint, clientName)
         if err != nil {
@@ -35,18 +33,15 @@ func main() {
         fmt.Printf("> connected to %s\n", brokerEndpoint)
 
 
-
-
-        // 3 - Subscribe to message MQTT topic and print incoming messages to stdout and write to file
         messageTopic := "testB"
         token := mqttClient.Subscribe(messageTopic, 1, func(_ mqtt.Client, msg mqtt.Message) {
                 fmt.Printf("< received raw message on %s: %s\n", msg.Topic(), msg.Payload())
                 f, _ := os.Create("new_files/ciphertext.json")
-		f.WriteString(string(msg.Payload()))
+		f.WriteString(string(msg.Payload()))//zapis do pliku
 
 
         })
-        //timeout := time.Second
+ 
         if !token.Wait() {
                 panic(fmt.Sprintf("failed to subscribe to MQTT topic: %v\n", token.Error()))
         }

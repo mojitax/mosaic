@@ -16,14 +16,15 @@ import (
 )
 
 func main() {
-    // 1 - Read a client identifier from a command line flag
+	//połączenie z brokerem jak w przykładzie
+   
     var clientName string
     flag.StringVar(&clientName, "client", "", "the client name")
     flag.Parse()
     if len(clientName) == 0 {
             panic("-client is required")
     }
-    // 2 - Connect to a MQTT broker 
+    
     brokerEndpoint := "18.221.34.191:1883"
     mqttClient, err := initMQTT(brokerEndpoint, clientName)
     if err != nil {
@@ -32,7 +33,7 @@ func main() {
     fmt.Printf("> connected to %s\n", brokerEndpoint)
     
     messageTopic := "testB"
-    
+    //przykładowe proste policy
 	policy:="A@auth0"
 	file, _ := os.Open("new_files/org.json")
 	reader := bufio.NewReader(file)
@@ -41,30 +42,31 @@ func main() {
 	org := new(abe.Org)
 	json.Unmarshal([]byte(orgStr), org)
 	org.OfJsonObj()
-	
+	//wczytaliśmy org wg opisu z setup.go
 	file2, _ := os.Open("new_files/authpub.json")
 	reader2 := bufio.NewReader(file2)
 	authpubStr, _:=reader2.ReadString('\n')
 	
 	authpub := new(abe.AuthPub)
-	
+
 	json.Unmarshal([]byte(authpubStr), authpub)
 	authpub.OfJsonObj()
+	//i podobnie klucz publiczny auth
 	if abe.CheckPolicyJson(policy, "") == "sat" {
 		// ecnrypting
-		secret := abe.NewRandomSecret(org)
-		policy = abe.RewritePolicy(policy)
+		secret := abe.NewRandomSecret(org)//nowy losowy klucz
+		policy = abe.RewritePolicy(policy)//przepisanie polityki
 		authpubs := abe.AuthPubsOfPolicy(policy)
 		for attr, _ := range authpubs.AuthPub {
 			authpubs.AuthPub[attr] = authpub
 		}
-		
-        secret_enc:=abe.Encrypt(secret, policy, authpubs)
-		secret_enc.ToJsonObj()
-		secret_encJson, _ :=json.Marshal(secret_enc)
-		secret_hash := abe.SecretHash(secret)
+		//tu coś kobinowane jest z atrybutami, o ile rozumiem to wybierane są po prostu potrzebne atrybuty do szyfrowania na podstawie polityki
+        secret_enc:=abe.Encrypt(secret, policy, authpubs)//szyfrowanie
+		secret_enc.ToJsonObj()//tak samo w celu serializacji i ujsonowienia trzeba porobić jsony z atrybutów obiektu Ciphertext
+		secret_encJson, _ :=json.Marshal(secret_enc)//jsonik
+		secret_hash := abe.SecretHash(secret)//obliczamy sobie hash i wyświetlamy go żeby zobaczyć, że jest taki sam co w decrypcie, ten hash może być faktycznym kluczem symetrycznym o ile rozumiem
 		fmt.Printf("%s", secret_hash)
-        if token := mqttClient.Publish(messageTopic, 1, true, secret_encJson); token.Wait() && token.Error() != nil {
+        if token := mqttClient.Publish(messageTopic, 1, true, secret_encJson); token.Wait() && token.Error() != nil {//wysyłka do brokera
                 fmt.Printf("> failed to publish message: %v\n", token.Error())
                 
         }

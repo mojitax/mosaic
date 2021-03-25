@@ -48,7 +48,7 @@ func main() {
 		userattrs_A := abe.NewRandomUserkey(user, "A@auth0", authkeys.AuthPrv)
 		userattrs_B := abe.NewRandomUserkey(user, "B@auth0", authkeys.AuthPrv)
 		userattrs := userattrs_A.Add(userattrs_B)
-		//fmt.Printf("%s", userattrs)
+		
 		userattrs.SelectUserAttrs(user, policy)
 
 		secret_dec := abe.Decrypt(ct, userattrs)
