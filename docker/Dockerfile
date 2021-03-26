@@ -69,7 +69,8 @@ ADD ./examples /mosaic/examples
 ADD ./service /mosaic/service
 ADD go.mod /mosaic
 ADD go.sum /mosaic
-
+ADD ./new_roles /mosaic/new_roles
+ADD ./new_files /mosaic/new_files
 ADD ./docker/docker-entrypoint.sh /mosaic
 
 WORKDIR /mosaic

@@ -17,7 +17,7 @@ func main(){
 	curve.SetSeed(seed).InitRng()
 	org := abe.NewRandomOrg(curve)
 	org.ToJsonObj()
-	fmt.Printf("%s\n", org)
+
 	orgJson, _ :=json.Marshal(org)
 	//generowanie kluczy dla nowego kgc
 	authkeys := abe.NewRandomAuth(org)
