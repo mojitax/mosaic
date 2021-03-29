@@ -4,7 +4,7 @@ package main
 import(
 	"github.com/marcellop71/mosaic/abe"
 	//"github.com/marcellop71/mosaic/abe/log"
-	"fmt"
+	//"fmt"
 	"os"
 	//"bufio"
 	"encoding/json"
