@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-
+        //subscribe to broker, receive message on topic, store into file new_files/ciphertext.json - nothing too fancy here
         //tu filozofii nie ma - odbiera z brokera stringa i zapisuje do pliku ciphertext.json
         //wszystko jak w przykładzie
         var clientName string

@@ -1,3 +1,12 @@
+# new stuff
+Mojitto: new_files and new_roles were added to dockerfile, so if you want to run it through docker you can do it exactly like shown somewhere below. 
+intructions for all of them are:
+```bash
+go run -tags z3,miracl new_roles/setup.go
+go run -tags z3,miracl new_roles/encrypt.go -client [mqtt_client_name1]
+go run -tags z3,miracl new_roles/subscriber.go -client [mqtt_client_name2]
+go run -tags z3,miracl new_roles/decrypt.go
+```
 # Mosaic
 
 *Mosaic* is a library doing Attribute Based Encryption (ABE). It is meant to be used as a example of a cryptographic core to be embedded in any solution willing to rely on an ABE scheme of this kind
