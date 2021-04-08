@@ -123,6 +123,14 @@ type AccessPolicy struct {
 	Vars []string         // attribute list
 	Row  map[string][]int // attribute -> access policy matrix rows index
 }
+//encrypted string with encrypted public key
+type Enc_and_Key struct{
+	Cipher_suit string `json:"ciphsuit"`
+	Enc_msg string `json:"encmsg"`
+	Enc_key string `json:"enckey"`
+	Plaintext_hash string `json:"plainhash"`
+	IV string `json:"IV"`
+}
 
 func NewPointOfJsonStr(xJson string) (x Point) {
 	x = NewPoint()

@@ -5,7 +5,7 @@ import (
 	"math/big"
 	"strings"
 	"fmt"
-	"github.com/marcellop71/mosaic/abe/log"
+	//"github.com/marcellop71/mosaic/abe/log"
 )
 
 // new random organization
@@ -124,13 +124,13 @@ func Encrypt(secret Point, policy string, authpubs *AuthPubs) (ct *Ciphertext) {
 	w := curve.NewRandomSecret(len(ap.Vars), true)
 	sh_s := computeShares(s, ap.M)
 	sh_w := computeShares(w, ap.M)
-	log.Debug("s0 secret %s", s[0])
-	for attr, rows := range ap.Row {
-		log.Debug("shares of secret s0 for %s", attr)
+	//log.Debug("s0 secret %s", s[0])
+	/*for attr, rows := range ap.Row {
+		//log.Debug("shares of secret s0 for %s", attr)
 		for _, i := range rows {
-			log.Debug("share on row %d: %s", i, sh_s[i])
+			//log.Debug("share on row %d: %s", i, sh_s[i])
 		}
-	}
+	}*/
 
 	S0 := curve.Pow(org.E, s[0])
 	C0 := curve.Mul(secret, S0)
@@ -174,12 +174,12 @@ func EncryptJson(secretJson string, policy string, authpubsJson string) string {
 func Decrypt(ct *Ciphertext, userattrs *UserAttrs) (secret Point) {
 	
 	org := ct.Org
-	fmt.Printf("\ninside\n")
+	
 	curve := org.Crv
-	fmt.Printf("\ninside2\n")
-	fmt.Printf("\n%s\n", curve)
+	
+	
 	huser := curve.HashToGroup(userattrs.User, "G2")
-	fmt.Printf("\ninside3\n")
+	
 	S0 := curve.UnitOnGroup("GT")
 	for attr, cs := range userattrs.Coeff {
 		for k, c := range cs {

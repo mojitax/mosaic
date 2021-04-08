@@ -2,10 +2,18 @@ package main
 
 import(
 	"os"
-	"github.com/marcellop71/mosaic/abe"
+	"mosaic/abe"
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"crypto/aes"
+    "crypto/sha256"
+    "crypto/cipher"
+    "crypto/rand"
+//	"encoding/hex"
+    "errors"
+    "bytes"
+    "io"
 )
 
 func main(){
@@ -15,8 +23,12 @@ func main(){
 	user:="marcello.paris@gmail.com"
 	file, _ := os.Open("new_files/ciphertext.json")
 	reader := bufio.NewReader(file)
-	ciphertextStr, _:=reader.ReadString('\n')
-	
+	message_pack_str, _:=reader.ReadString('\n')
+	message_pack := new(abe.Enc_and_Key)
+	json.Unmarshal([]byte(message_pack_str), message_pack)
+
+	ciphertextStr:=message_pack.Enc_key
+	//fmt.Printf("%s", ciphertextStr)
 	ciphertext := new(abe.Ciphertext)
 	json.Unmarshal([]byte(ciphertextStr), ciphertext)
 	ciphertext.OfJsonObj()
@@ -36,7 +48,85 @@ func main(){
 	secret_dec := abe.Decrypt(ciphertext, userattrs)//deszyfracja //dec
 	secret_dec_hash := abe.SecretHash(secret_dec)//hash
 	
-	fmt.Printf("%s", secret_dec_hash)//wyświetlić, porównać z tym z decrypta
+	//fmt.Printf("%s", secret_dec_hash)//wyświetlić, porównać z tym z decrypta
 	//it should print same hash as encrypt has done, compare, the end
+	enc_msg:=[]byte(abe.Decode(message_pack.Enc_msg))
+	fmt.Printf("\n%s", abe.Encode(string(enc_msg)))
+	key := []byte(abe.Decode(secret_dec_hash))
+	block, err := aes.NewCipher(key)
+	if err != nil {
+			panic(err)
+	}
+	
+	iv := enc_msg[:aes.BlockSize]
+	
+	enc_msg = enc_msg[aes.BlockSize:]
+	fmt.Printf("\n%s", abe.Encode(string(enc_msg)))
+	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
+			panic(err)
+	}
+
+	mode := cipher.NewCBCDecrypter(block, iv)
+	mode.CryptBlocks(enc_msg, enc_msg)
+	fmt.Printf("\n%v", string(enc_msg))
+	enc_msg, _ = pkcs7Unpad(enc_msg, 32)
+	fmt.Printf("\n%s", string(enc_msg))
+	hash:=sha256.Sum256([]byte(""))
+
+	fmt.Printf("\n%s", abe.Encode(string(hash[:])))
+	
 
 }	
+
+
+
+var (
+	// ErrInvalidBlockSize indicates hash blocksize <= 0.
+	ErrInvalidBlockSize = errors.New("invalid blocksize")
+
+	// ErrInvalidPKCS7Data indicates bad input to PKCS7 pad or unpad.
+	ErrInvalidPKCS7Data = errors.New("invalid PKCS7 data (empty or not padded)")
+
+	// ErrInvalidPKCS7Padding indicates PKCS7 unpad fails to bad input.
+	ErrInvalidPKCS7Padding = errors.New("invalid padding on input")
+)
+
+func pkcs7Pad(b []byte, blocksize int) ([]byte, error) {
+	if blocksize <= 0 {
+		return nil, ErrInvalidBlockSize
+	}
+	if b == nil || len(b) == 0 {
+		return nil, ErrInvalidPKCS7Data
+	}
+	n := blocksize - (len(b) % blocksize)
+	pb := make([]byte, len(b)+n)
+	copy(pb, b)
+	copy(pb[len(b):], bytes.Repeat([]byte{byte(n)}, n))
+	return pb, nil
+}
+
+// pkcs7Unpad validates and unpads data from the given bytes slice.
+// The returned value will be 1 to n bytes smaller depending on the
+// amount of padding, where n is the block size.
+func pkcs7Unpad(b []byte, blocksize int) ([]byte, error) {
+	if blocksize <= 0 {
+		return nil, ErrInvalidBlockSize
+	}
+	if b == nil || len(b) == 0 {
+		return nil, ErrInvalidPKCS7Data
+	}
+	if len(b)%blocksize != 0 {
+		return nil, ErrInvalidPKCS7Padding
+	}
+	c := b[len(b)-1]
+	n := int(c)
+	if n == 0 || n > len(b) {
+		return nil, ErrInvalidPKCS7Padding
+	}
+	for i := 0; i < n; i++ {
+		if b[len(b)-n+i] != c {
+			return nil, ErrInvalidPKCS7Padding
+		}
+	}
+	return b[:len(b)-n], nil
+}
