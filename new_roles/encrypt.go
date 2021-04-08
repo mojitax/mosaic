@@ -80,8 +80,9 @@ func main() {
                 
                 key := []byte(abe.Decode(secret_hash))
                 true_plaintext := []byte("stanwodywwisle")
-                plaintext, _ :=pkcs7Pad(true_plaintext, 32)
-                fmt.Printf("\n%v, %v\n", plaintext, true_plaintext)
+                plaintext, _ :=pkcs7Pad(true_plaintext, 16)
+               
+               
                 // CBC mode works on blocks so plaintexts may need to be padded to the
                 // next whole block. For an example of such padding, see
                 // https://tools.ietf.org/html/rfc5246#section-6.2.3.2. Here we'll

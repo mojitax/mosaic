@@ -9,11 +9,11 @@ import(
 	"crypto/aes"
     "crypto/sha256"
     "crypto/cipher"
-    "crypto/rand"
+//    "crypto/rand"
 //	"encoding/hex"
     "errors"
     "bytes"
-    "io"
+   // "io"
 )
 
 func main(){
@@ -51,7 +51,6 @@ func main(){
 	//fmt.Printf("%s", secret_dec_hash)//wyświetlić, porównać z tym z decrypta
 	//it should print same hash as encrypt has done, compare, the end
 	enc_msg:=[]byte(abe.Decode(message_pack.Enc_msg))
-	fmt.Printf("\n%s", abe.Encode(string(enc_msg)))
 	key := []byte(abe.Decode(secret_dec_hash))
 	block, err := aes.NewCipher(key)
 	if err != nil {
@@ -59,19 +58,14 @@ func main(){
 	}
 	
 	iv := enc_msg[:aes.BlockSize]
-	
 	enc_msg = enc_msg[aes.BlockSize:]
-	fmt.Printf("\n%s", abe.Encode(string(enc_msg)))
-	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
-			panic(err)
-	}
 
 	mode := cipher.NewCBCDecrypter(block, iv)
 	mode.CryptBlocks(enc_msg, enc_msg)
 	fmt.Printf("\n%v", string(enc_msg))
-	enc_msg, _ = pkcs7Unpad(enc_msg, 32)
+	enc_msg, _ = pkcs7Unpad(enc_msg, 16)
 	fmt.Printf("\n%s", string(enc_msg))
-	hash:=sha256.Sum256([]byte(""))
+	hash:=sha256.Sum256([]byte(enc_msg))
 
 	fmt.Printf("\n%s", abe.Encode(string(hash[:])))
 	
