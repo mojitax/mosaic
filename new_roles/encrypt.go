@@ -38,91 +38,97 @@ func main() {
             panic(fmt.Sprintf("failed to init mqtt client: %v", err))
         }
         fmt.Printf("> connected to %s\n", brokerEndpoint)
-    
-        messageTopic := "testB"
-        //przykładowe proste policy
-        policy:="A@auth0"
-	file, _ := os.Open("new_files/org.json")
-	reader := bufio.NewReader(file)
-	orgStr, _:=reader.ReadString('\n')
-	
-	org := new(abe.Org)
-	json.Unmarshal([]byte(orgStr), org)
-	org.OfJsonObj()
-        //we got our curve and now are restoring it into object
-	//wczytaliśmy org wg opisu z setup.go
-	file2, _ := os.Open("new_files/authpub.json")
-	reader2 := bufio.NewReader(file2)
-	authpubStr, _:=reader2.ReadString('\n')
-	
-	authpub := new(abe.AuthPub)
-
-	json.Unmarshal([]byte(authpubStr), authpub)
-	authpub.OfJsonObj()
-        //same with master public key
-	//i podobnie klucz publiczny auth
-	if abe.CheckPolicyJson(policy, "") == "sat" {
-		// ecnrypting
-		secret := abe.NewRandomSecret(org)//nowy losowy klucz //new  random secret (treated as random symmetric key)
-		policy = abe.RewritePolicy(policy)//przepisanie polityki //rewriting policy
-		authpubs := abe.AuthPubsOfPolicy(policy)
-		for attr, _ := range authpubs.AuthPub {
-			authpubs.AuthPub[attr] = authpub
-		}
-		//tu coś kobinowane jest z atrybutami, o ile rozumiem to wybierane są po prostu potrzebne atrybuty do szyfrowania na podstawie polityki
-                //building table of attributes necessary for encryption
-                secret_enc:=abe.Encrypt(secret, policy, authpubs)//szyfrowanie //enc
-		secret_enc.ToJsonObj()//tak samo w celu serializacji i ujsonowienia trzeba porobić jsony z atrybutów obiektu Ciphertext
-                //we want to have the ciphertext stored as json (contains also org and policy information) so are doing same thing as usual
-		secret_encJson, _ :=json.Marshal(secret_enc)//jsonik //j-sonic (^^)
-		secret_hash := abe.SecretHash(secret)//obliczamy sobie hash i wyświetlamy go żeby zobaczyć, że jest taki sam co w decrypcie, ten hash może być faktycznym kluczem symetrycznym o ile rozumiem
-		//fmt.Printf("%s", secret_hash)//we show hash of our secretly chosen symmetric key to compare with decrypted one
+        scanner := bufio.NewScanner(os.Stdin)
+        for scanner.Scan() {
+                true_plaintext := []byte(scanner.Text())
+                if len(true_plaintext) == 0 { // Skip empty messages
+                        continue
+                }
+                messageTopic := "testB"
+                //przykładowe proste policy
+                policy:="A@auth0"
+                file, _ := os.Open("new_files/org.json")
+                reader := bufio.NewReader(file)
+                orgStr, _:=reader.ReadString('\n')
                 
-                key := []byte(abe.Decode(secret_hash))
-                true_plaintext := []byte("stanwodywwisle")
-                plaintext, _ :=pkcs7Pad(true_plaintext, 16)
-               
-               
-                // CBC mode works on blocks so plaintexts may need to be padded to the
-                // next whole block. For an example of such padding, see
-                // https://tools.ietf.org/html/rfc5246#section-6.2.3.2. Here we'll
-                // assume that the plaintext is already of the correct length.
-                if len(plaintext)%aes.BlockSize != 0 {
-                        panic("plaintext is not a multiple of the block size")
-                }
+                org := new(abe.Org)
+                json.Unmarshal([]byte(orgStr), org)
+                org.OfJsonObj()
+                //we got our curve and now are restoring it into object
+                //wczytaliśmy org wg opisu z setup.go
+                file2, _ := os.Open("new_files/authpub.json")
+                reader2 := bufio.NewReader(file2)
+                authpubStr, _:=reader2.ReadString('\n')
+                
+                authpub := new(abe.AuthPub)
 
-                block, err := aes.NewCipher(key)
-                if err != nil {
-                        panic(err)
-                }
+                json.Unmarshal([]byte(authpubStr), authpub)
+                authpub.OfJsonObj()
+                //same with master public key
+                //i podobnie klucz publiczny auth
+                if abe.CheckPolicyJson(policy, "") == "sat" {
+                        // ecnrypting
+                        secret := abe.NewRandomSecret(org)//nowy losowy klucz //new  random secret (treated as random symmetric key)
+                        policy = abe.RewritePolicy(policy)//przepisanie polityki //rewriting policy
+                        authpubs := abe.AuthPubsOfPolicy(policy)
+                        for attr, _ := range authpubs.AuthPub {
+                                authpubs.AuthPub[attr] = authpub
+                        }
+                        //tu coś kobinowane jest z atrybutami, o ile rozumiem to wybierane są po prostu potrzebne atrybuty do szyfrowania na podstawie polityki
+                        //building table of attributes necessary for encryption
+                        secret_enc:=abe.Encrypt(secret, policy, authpubs)//szyfrowanie //enc
+                        secret_enc.ToJsonObj()//tak samo w celu serializacji i ujsonowienia trzeba porobić jsony z atrybutów obiektu Ciphertext
+                        //we want to have the ciphertext stored as json (contains also org and policy information) so are doing same thing as usual
+                        secret_encJson, _ :=json.Marshal(secret_enc)//jsonik //j-sonic (^^)
+                        secret_hash := abe.SecretHash(secret)//obliczamy sobie hash i wyświetlamy go żeby zobaczyć, że jest taki sam co w decrypcie, ten hash może być faktycznym kluczem symetrycznym o ile rozumiem
+                        //fmt.Printf("%s", secret_hash)//we show hash of our secretly chosen symmetric key to compare with decrypted one
+                        
+                        key := []byte(abe.Decode(secret_hash))
+                        //true_plaintext := []byte("stanwodywwisle")
+                        plaintext, _ :=pkcs7Pad(true_plaintext, 16)
+                
+                
+                        // CBC mode works on blocks so plaintexts may need to be padded to the
+                        // next whole block. For an example of such padding, see
+                        // https://tools.ietf.org/html/rfc5246#section-6.2.3.2. Here we'll
+                        // assume that the plaintext is already of the correct length.
+                        if len(plaintext)%aes.BlockSize != 0 {
+                                panic("plaintext is not a multiple of the block size")
+                        }
 
-                // The IV needs to be unique, but not secure. Therefore it's common to
-                // include it at the beginning of the ciphertext.
-                ciphertext := make([]byte, aes.BlockSize+len(plaintext))
-                iv := ciphertext[:aes.BlockSize]
-                if _, err := io.ReadFull(rand.Reader, iv); err != nil {
-                        panic(err)
-                }
-                mode := cipher.NewCBCEncrypter(block, iv)
-                mode.CryptBlocks(ciphertext[aes.BlockSize:], plaintext)
+                        block, err := aes.NewCipher(key)
+                        if err != nil {
+                                panic(err)
+                        }
 
-                // It's important to remember that ciphertexts must be authenticated
-                // (i.e. by using crypto/hmac) as well as being encrypted in order to
-                // be secure.
-                message_pack := new(abe.Enc_and_Key)
-                message_pack.Cipher_suit = "aes-abe-sha256"
-                message_pack.Enc_msg = abe.Encode(string(ciphertext))
-                message_pack.Enc_key = string(secret_encJson)
-                message_pack.IV = abe.Encode(string(iv))
-                hash:=sha256.Sum256([]byte(true_plaintext))
-                message_pack.Plaintext_hash = abe.Encode(string(hash[:]))
-                x, _:= json.Marshal(message_pack)
-                x_ := string(x)
-                fmt.Printf("\n%v\n", x_)
-                if token := mqttClient.Publish(messageTopic, 1, true, x_); token.Wait() && token.Error() != nil {//wysyłka do brokera //send-IT
-                        fmt.Printf("> failed to publish message: %v\n", token.Error())                       
+                        // The IV needs to be unique, but not secure. Therefore it's common to
+                        // include it at the beginning of the ciphertext.
+                        ciphertext := make([]byte, aes.BlockSize+len(plaintext))
+                        iv := ciphertext[:aes.BlockSize]
+                        if _, err := io.ReadFull(rand.Reader, iv); err != nil {
+                                panic(err)
+                        }
+                        mode := cipher.NewCBCEncrypter(block, iv)
+                        mode.CryptBlocks(ciphertext[aes.BlockSize:], plaintext)
+
+                        // It's important to remember that ciphertexts must be authenticated
+                        // (i.e. by using crypto/hmac) as well as being encrypted in order to
+                        // be secure.
+                        message_pack := new(abe.Enc_and_Key)
+                        message_pack.Cipher_suit = "aes-abe-sha256"
+                        message_pack.Enc_msg = abe.Encode(string(ciphertext))
+                        message_pack.Enc_key = string(secret_encJson)
+                        message_pack.IV = abe.Encode(string(iv))
+                        hash:=sha256.Sum256([]byte(true_plaintext))
+                        message_pack.Plaintext_hash = abe.Encode(string(hash[:]))
+                        x, _:= json.Marshal(message_pack)
+                        x_ := string(x)
+                        fmt.Printf("\n%v\n", x_)
+                        if token := mqttClient.Publish(messageTopic, 1, true, x_); token.Wait() && token.Error() != nil {//wysyłka do brokera //send-IT
+                                fmt.Printf("> failed to publish message: %v\n", token.Error())                       
+                        }
                 }
-	}
+        }
 }
 
 func initMQTT(brokerEndpoint, clientID string) (mqtt.Client, error) {

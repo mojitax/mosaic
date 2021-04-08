@@ -62,12 +62,14 @@ func main(){
 
 	mode := cipher.NewCBCDecrypter(block, iv)
 	mode.CryptBlocks(enc_msg, enc_msg)
-	fmt.Printf("\n%v", string(enc_msg))
+	
 	enc_msg, _ = pkcs7Unpad(enc_msg, 16)
 	fmt.Printf("\n%s", string(enc_msg))
 	hash:=sha256.Sum256([]byte(enc_msg))
-
-	fmt.Printf("\n%s", abe.Encode(string(hash[:])))
+	if (abe.Encode(string(hash[:]))==message_pack.Plaintext_hash){
+		fmt.Printf("\nPlaintext hashes equal\n")
+	}
+	
 	
 
 }	
