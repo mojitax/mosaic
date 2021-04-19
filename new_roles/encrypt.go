@@ -26,12 +26,18 @@ func main() {
 	//połączenie z brokerem jak w przykładzie
         //estabilishing broker connection
         var clientName string
+        var policyPath string
         flag.StringVar(&clientName, "client", "", "the client name")
+        flag.StringVar(&policyPath, "policy", "", "path to policy")
+        
         flag.Parse()
         if len(clientName) == 0 {
             panic("-client is required")
         }
-    
+        if len(policyPath) == 0 {
+            panic("-policy is required")
+        }
+        
         brokerEndpoint := "18.221.34.191:1883"
         mqttClient, err := initMQTT(brokerEndpoint, clientName)
         if err != nil {
@@ -46,7 +52,10 @@ func main() {
                 }
                 messageTopic := "testB"
                 //przykładowe proste policy
-                policy:="A@auth0"
+                policyfile, _ := os.Open("new_files/"+policyPath)
+                policyreader := bufio.NewReader(policyfile)
+                policy, _:=policyreader.ReadString('\n')
+                fmt.Printf("%s\n", policy)
                 file, _ := os.Open("new_files/org.json")
                 reader := bufio.NewReader(file)
                 orgStr, _:=reader.ReadString('\n')
