@@ -9,6 +9,7 @@ import(
 	"crypto/aes"
     "crypto/sha256"
     "crypto/cipher"
+	"flag"
 //    "crypto/rand"
 //	"encoding/hex"
     "errors"
@@ -20,7 +21,12 @@ func main(){
 	//so we could make it read username and attributes from file as parameter, so far it's hardcoded 
 	//tu myślę że można dodać parametryzację przy uruchamianiu czyli -user marcello.paris@gmail.com -keyspath .../marcello.paris@gmail.com.json
 	//ale to do ustalenia
-	user:="marcello.paris@gmail.com"
+	var keysPath string
+    flag.StringVar(&keysPath, "keys", "", "path to keys")
+	flag.Parse()
+    if len(keysPath) == 0 {
+        panic("-keys is required")
+    }
 	file, _ := os.Open("new_files/ciphertext.json")
 	reader := bufio.NewReader(file)
 	message_pack_str, _:=reader.ReadString('\n')
@@ -34,7 +40,7 @@ func main(){
 	ciphertext.OfJsonObj()
 	//so we restored ciphertext into object from json file
 	//otwierzyliśmy ciphertext
-	file2, _ := os.Open("new_files/user_keys/"+user+".json")
+	file2, _ := os.Open(keysPath)
 	reader2 := bufio.NewReader(file2)
 	userattrsStr, _:=reader2.ReadString('\n')
 	
@@ -43,7 +49,7 @@ func main(){
 	userattrs.OfJsonObj()
 	//same for keys
 	//otworzyliśmy klucze dla atrybutów
-	userattrs.SelectUserAttrs(user, ciphertext.Policy)//okrajamy tylko do tych, które się przydadzą
+	userattrs.SelectUserAttrs(userattrs.User, ciphertext.Policy)//okrajamy tylko do tych, które się przydadzą
 	//we choose only those keys which are required for decryption	
 	secret_dec := abe.Decrypt(ciphertext, userattrs)//deszyfracja //dec
 	secret_dec_hash := abe.SecretHash(secret_dec)//hash
