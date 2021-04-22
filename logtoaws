@@ -1,0 +1,1 @@
+ssh -i "kgc.pem" ec2-user@ec2-13-58-65-143.us-east-2.compute.amazonaws.com
