@@ -24,7 +24,7 @@ func main() {
     fmt.Printf("%s\n", string(attrs))
 	
 	var conn *grpc.ClientConn
-	conn, err := grpc.Dial("172.31.42.211:9000", grpc.WithInsecure())
+	conn, err := grpc.Dial("13.58.65.143:9000", grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("did not connect: %s", err)
 	}
