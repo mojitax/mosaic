@@ -72,6 +72,7 @@ ADD ./sclient_side /mosaic/sclient_side
 RUN mkdir /mosaic/new_files
 RUN mkdir /mosaic/new_files/user_keys
 RUN cp /mosaic/sclient_side/attributes /mosaic/new_files
+RUN cp /mosaic/sclient_side/sig_master_pub.json /mosaic/new_files
 WORKDIR /mosaic
 
 CMD ["/bin/bash"]

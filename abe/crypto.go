@@ -4,7 +4,6 @@ import (
 	"crypto/sha256"
 	"math/big"
 	"strings"
-	"fmt"
 	//"github.com/marcellop71/mosaic/abe/log"
 )
 
@@ -198,16 +197,26 @@ func Decrypt(ct *Ciphertext, userattrs *UserAttrs) (secret Point) {
 	secret = curve.Div(ct.C0, S0)
 	return
 }
+func Setup_signature(org *Org) (t *big.Int, Q Point){
+	curve:=org.Crv
+	t=curve.NewRandomExp()
+	Q=curve.Pow(org.G2, t)
+	return
+}
 
+/*func sign(message string, id_key string ) string{
+
+
+}
+func verify(message string, signature string, org Org, id string) string{
+	
+
+} */
 // Json API for Decrypt
 func DecryptJson(ctJson string, userattrsJson string) string {
-	fmt.Printf("\noutside\n")
 	ct := NewCiphertextOfJsonStr(ctJson).OfJsonObj()
-	fmt.Printf("\noutside1\n")
 	userattrs := NewUserAttrsOfJsonStr(userattrsJson).OfJsonObj()
-	fmt.Printf("\noutside2\n")
 	secret := Decrypt(ct, userattrs)
-	fmt.Printf("\noutside3\n")
 	return secret.ToJsonObj().GetP()
 }
 

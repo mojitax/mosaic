@@ -75,8 +75,11 @@ ADD ./docker/docker-entrypoint.sh /mosaic
 RUN mkdir /mosaic/new_files
 RUN mkdir /mosaic/new_files/user_keys
 RUN cp /mosaic/server_side/authprv.json /mosaic/new_files
+RUN cp /mosaic/server_side/sig_master_pub.json /mosaic/new_files
+RUN cp /mosaic/server_side/sig_master_secret.json /mosaic/new_files
+RUN cp /mosaic/server_side/org.json /mosaic/new_files
 WORKDIR /mosaic
 EXPOSE 9000
-RUN go run -tags=z3,miracl server_side/server.go
+
 
 CMD ["/bin/bash"]

@@ -15,6 +15,7 @@ import(
     "errors"
     "bytes"
    // "io"
+   "math/big"
 )
 
 func main(){
@@ -38,6 +39,8 @@ func main(){
 	ciphertext := new(abe.Ciphertext)
 	json.Unmarshal([]byte(ciphertextStr), ciphertext)
 	ciphertext.OfJsonObj()
+
+	org:=ciphertext.Org
 	//so we restored ciphertext into object from json file
 	//otwierzyliśmy ciphertext
 	file2, _ := os.Open(keysPath)
@@ -76,8 +79,36 @@ func main(){
 		fmt.Printf("\nPlaintext hashes equal\n")
 	}
 	
-	
-
+	ID:=message_pack.ID
+	fmt.Println(ID)
+	QID:=org.Crv.HashToGroup(ID, "G1")
+	s:=new(big.Int)
+	h:= s.SetBytes(hash[:])
+	file, _ = os.Open("new_files/sig_master_pub.json")
+	reader = bufio.NewReader(file)
+	P_pubStr, _:=reader.ReadString('\n')
+	P_pub:=new(abe.MiraclPoint)
+	json.Unmarshal([]byte(P_pubStr), P_pub)
+	P_pub.OfJsonObj(org.Crv)
+	UStr:=message_pack.Signature_U
+	U := new(abe.MiraclPoint)
+	json.Unmarshal([]byte(UStr), U)
+	U.OfJsonObj(org.Crv)
+	VStr:=message_pack.Signature_V
+	V := new(abe.MiraclPoint)
+	json.Unmarshal([]byte(VStr), V)
+	V.OfJsonObj(org.Crv)
+	L:=org.Crv.Pair(V, org.G2)
+	R:=org.Crv.Pair(org.Crv.Mul(U, org.Crv.Pow(QID, h)),P_pub)
+	L.ToJsonObj()
+	R.ToJsonObj()
+	fmt.Println(L)
+	fmt.Println(R)
+	if(L.GetP()==R.GetP()){
+		fmt.Println("Signature is valid")
+	}else {
+		fmt.Println("Signature is not valid")
+	}
 }	
 
 

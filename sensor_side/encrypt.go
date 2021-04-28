@@ -16,7 +16,7 @@ import (
     "io"
     mqtt "github.com/eclipse/paho.mqtt.golang"
     "encoding/json"
-	
+"math/big"
     "mosaic/abe"
 	
 	
@@ -52,7 +52,7 @@ func main() {
                 }
                 messageTopic := "testB"
                 //przykładowe proste policy
-                policyfile, _ := os.Open("new_files/"+policyPath)
+                policyfile, _ := os.Open(policyPath)
                 policyreader := bufio.NewReader(policyfile)
                 policy, _:=policyreader.ReadString('\n')
                 fmt.Printf("%s\n", policy)
@@ -124,11 +124,39 @@ func main() {
                         // (i.e. by using crypto/hmac) as well as being encrypted in order to
                         // be secure.
                         message_pack := new(abe.Enc_and_Key)
-                        message_pack.Cipher_suit = "aes-abe-sha256"
+                        message_pack.Cipher_suit = "aes-abe-sha256-IBSign"
                         message_pack.Enc_msg = abe.Encode(string(ciphertext))
                         message_pack.Enc_key = string(secret_encJson)
                         message_pack.IV = abe.Encode(string(iv))
+                        file3, _ := os.Open("new_files/user_sig_keys/"+clientName+".json")
+                        
+                        reader3 := bufio.NewReader(file3)
+                        DID_Str, _:=reader3.ReadString('\n')
+                        if len(DID_Str) == 0 {
+                                panic("no keys for given id")
+                        }
+                        file, _ = os.Open("new_files/sig_master_pub.json")
+                        reader = bufio.NewReader(file)
+                        P_pubStr, _:=reader.ReadString('\n')
+                        P_pub:=new(abe.MiraclPoint)
+                        json.Unmarshal([]byte(P_pubStr), P_pub)
+                        DID:=new(abe.MiraclPoint)
+                        json.Unmarshal([]byte(DID_Str), DID)
+                        DID.OfJsonObj(org.Crv)
                         hash:=sha256.Sum256([]byte(true_plaintext))
+                        s:=new(big.Int)
+	                h:= s.SetBytes(hash[:])
+                        r:=org.Crv.NewRandomExp()
+                        QID:=org.Crv.HashToGroup(clientName, "G1")
+	                U:=org.Crv.Pow(QID, r)
+	                V:=org.Crv.Pow(DID, r.Add(r, h))
+	                U.ToJsonObj()
+                        V.ToJsonObj()
+                        message_pack.ID=clientName
+                        UJson, _:=json.Marshal(U)
+                        VJson, _:=json.Marshal(V)
+                        message_pack.Signature_U = string(UJson)
+                        message_pack.Signature_V = string(VJson)
                         message_pack.Plaintext_hash = abe.Encode(string(hash[:]))
                         x, _:= json.Marshal(message_pack)
                         x_ := string(x)

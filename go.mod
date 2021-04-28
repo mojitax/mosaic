@@ -9,6 +9,7 @@ require (
 	github.com/golang/protobuf v1.5.2
 	github.com/jmhodges/levigo v1.0.0
 	github.com/marcellop71/mosaic v0.0.0-20201120105430-3a3868738327
+	github.com/miracl/core v0.0.0-20210420174054-832472e4d91a // indirect
 	github.com/sirupsen/logrus v1.8.1
 	golang.org/x/net v0.0.0-20210415231046-e915ea6b2b7d
 	golang.org/x/sys v0.0.0-20210415045647-66c3f260301c // indirect

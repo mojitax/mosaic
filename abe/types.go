@@ -130,6 +130,21 @@ type Enc_and_Key struct{
 	Enc_key string `json:"enckey"`
 	Plaintext_hash string `json:"plainhash"`
 	IV string `json:"IV"`
+	ID string `json:"ID"`
+	Signature_U string `json:"signature_U"`
+	Signature_V string `json:"signature_V"`
+}
+type Signature_key struct{
+	S Point `json:"-"`
+	S_ string `json:"S"`
+}
+type Auth_signature_key_prv struct{
+	t *big.Int `json:"-"`
+	t_ string `json:"t"`
+}
+type Auth_signature_key_pub struct{
+	Q Point `json:"-"`
+	Q_ string `json:"Q"`
 }
 
 func NewPointOfJsonStr(xJson string) (x Point) {

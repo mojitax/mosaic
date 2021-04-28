@@ -2,9 +2,9 @@ package main
 
 
 import(
-	"github.com/marcellop71/mosaic/abe"
+	"mosaic/abe"
 	//"github.com/marcellop71/mosaic/abe/log"
-	//"fmt"
+	"fmt"
 	"os"
 	//"bufio"
 	"encoding/json"
@@ -57,7 +57,7 @@ func main(){
 	file2.WriteString(string(authpubJson))
 	file4, _:=os.Create("new_files/authprv.json") 
 	file4.WriteString(string(authprvJson))
-
+	/*
 	//Zapisane zostały parametry do plików. Właściwie authprv.json może być niepotrzebny w pliku bo jest wykorzystywany tylko w setupie.
 	//So basic parameters are stored into file, I'm not sure if authprv is really necessary, since it's used only by kgc. 
 	users := []string{
@@ -84,5 +84,13 @@ func main(){
 		userattrsJson, _ :=json.Marshal(userattrs)//zawijania do json stringa
 		file.WriteString(string(userattrsJson))//zapis
 		//stored in file new_files/user_keys with user name 
-	}
+	}*/
+	t,Q:=abe.Setup_signature(org)
+	fmt.Println("%s\n", Q)
+	s,_:=json.Marshal(Q.ToJsonObj())
+	fmt.Println("%s\n", Q)
+	file5, _:=os.Create("new_files/sig_master_secret.json") 
+	file5.WriteString(t.String())
+	file6, _:=os.Create("new_files/sig_master_pub.json") 
+	file6.WriteString(string(s))
 }
