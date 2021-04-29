@@ -102,8 +102,6 @@ func main(){
 	R:=org.Crv.Pair(org.Crv.Mul(U, org.Crv.Pow(QID, h)),P_pub)
 	L.ToJsonObj()
 	R.ToJsonObj()
-	fmt.Println(L)
-	fmt.Println(R)
 	if(L.GetP()==R.GetP()){
 		fmt.Println("Signature is valid")
 	}else {

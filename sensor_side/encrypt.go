@@ -55,7 +55,7 @@ func main() {
                 policyfile, _ := os.Open(policyPath)
                 policyreader := bufio.NewReader(policyfile)
                 policy, _:=policyreader.ReadString('\n')
-                fmt.Printf("%s\n", policy)
+                //fmt.Printf("%s\n", policy)
                 file, _ := os.Open("new_files/org.json")
                 reader := bufio.NewReader(file)
                 orgStr, _:=reader.ReadString('\n')

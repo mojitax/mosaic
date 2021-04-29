@@ -1,12 +1,61 @@
 # new stuff
-Mojitto: new_files and new_roles were added to dockerfile, so if you want to run it through docker you can do it exactly like shown somewhere below. 
-intructions for all of them are:
+Mojitto: 
+Pre-demo: DON'T DO THIS!!!
 ```bash
-go run -tags z3,miracl new_roles/setup.go
-go run -tags z3,miracl new_roles/encrypt.go -client [mqtt_client_name1]
-go run -tags z3,miracl new_roles/subscriber.go -client [mqtt_client_name2]
-go run -tags z3,miracl new_roles/decrypt.go
+docker run -it -p 9000:9000 mosaic:latest go run -tags=z3,miracl server_side/setup.go
 ```
+Creates parameters and global keys for all sides, those parameters are:
+master_key - authpub.json
+master_secret_key - authprv.json
+master_signature_key - sig_master_pub.json 
+master_secret_signature_key - sig_master_secret.json
+org - org.json
+You need to feed those parameters to all sides, if you run setup (these are mocked).
+
+
+pkg (requires: org.json, authprv.json, sig_master_pub.json, sig_master_secret.json):
+```bash
+./server_docker/build_image.sh (done on AWS)
+
+docker run -it -p 9000:9000 mosaic:latest go run -tags=z3,miracl server_side/server.go
+```
+Just runs and waits for key demands from sensors and clients. If demand is one-line string it generates 
+IBSignature keys, ABE-keys otherwise. 
+
+
+sensor:
+(building docker)
+```bash
+./sensor_docker/build_image.sh
+docker run -it mosaic:latest
+```
+```bash
+go run -tags=z3,miracl sensor_side/extract_sig.go -id sensor2 
+```
+Obtains signature keys from server and stores in new_files/user_sig_keys/sensor2.json
+```bash
+go run -tags=z3,miracl sensor_side/encrypt.go -client sensor2 -policy sensor_side/policy
+```
+Given the policy it encrypts message taken from stdin, signs with string stated in -client parameter and publishes to mqtt broker.
+
+client:
+(building docker)
+```bash
+./sclient_docker/build_image.sh
+docker run -it mosaic_client:latest
+```
+```bash
+go run -tags=z3,miracl sclient_side/extract.go -attrs sclient_side/attributes
+```
+Obtains encryption keys from server and stores in new_files/user_keys/[client_id].json, where [client_id] is first line in attributes file
+```bash
+go run -tags=z3,miracl sclient_side/subscriber.go -client client
+```
+Obtains last message in mqtt broker and stores it to new_files/ciphertext.json
+```bash
+go run -tags=z3,miracl sclient_side/decrypt.go -keys new_files/user_keys/[client_id].json
+```
+Decrypts, compares hashes, verifies authenticity from signature.
 # Mosaic
 
 *Mosaic* is a library doing Attribute Based Encryption (ABE). It is meant to be used as a example of a cryptographic core to be embedded in any solution willing to rely on an ABE scheme of this kind

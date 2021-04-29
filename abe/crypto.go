@@ -117,7 +117,7 @@ func GetOrgFromAuthPubs(authpubs *AuthPubs) *Org {
 func Encrypt(secret Point, policy string, authpubs *AuthPubs) (ct *Ciphertext) {
 	org := GetOrgFromAuthPubs(authpubs)
 	curve := org.Crv
-
+	
 	ap := buildAccessPolicy(policy)
 	s := curve.NewRandomSecret(len(ap.Vars), false)
 	w := curve.NewRandomSecret(len(ap.Vars), true)
