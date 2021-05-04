@@ -66,12 +66,9 @@ RUN go get google.golang.org/grpc
 RUN mkdir /mosaic
 ADD ./abe /mosaic/abe
 ADD ./lib/mosaic.go /mosaic/lib
-ADD ./examples /mosaic/examples
-ADD ./service /mosaic/service
 ADD go.mod /mosaic
 ADD go.sum /mosaic
 ADD ./server_side /mosaic/server_side
-ADD ./docker/docker-entrypoint.sh /mosaic
 RUN mkdir /mosaic/new_files
 RUN mkdir /mosaic/new_files/user_keys
 RUN cp /mosaic/server_side/authprv.json /mosaic/new_files
