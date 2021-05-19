@@ -16,12 +16,16 @@ import(
     "bytes"
    // "io"
    "math/big"
+   "time"
 )
 
 func main(){
 	//so we could make it read username and attributes from file as parameter, so far it's hardcoded 
 	//tu myślę że można dodać parametryzację przy uruchamianiu czyli -user marcello.paris@gmail.com -keyspath .../marcello.paris@gmail.com.json
 	//ale to do ustalenia
+	
+
+    
 	var keysPath string
     flag.StringVar(&keysPath, "keys", "", "path to keys")
 	flag.Parse()
@@ -50,11 +54,14 @@ func main(){
 	userattrs := new(abe.UserAttrs)
 	json.Unmarshal([]byte(userattrsStr), userattrs)
 	userattrs.OfJsonObj()
+	start := time.Now()
 	//same for keys
 	//otworzyliśmy klucze dla atrybutów
 	userattrs.SelectUserAttrs(userattrs.User, ciphertext.Policy)//okrajamy tylko do tych, które się przydadzą
 	//we choose only those keys which are required for decryption	
 	secret_dec := abe.Decrypt(ciphertext, userattrs)//deszyfracja //dec
+	elapsed := time.Since(start)
+    fmt.Printf("Decryption took %s", elapsed)
 	secret_dec_hash := abe.SecretHash(secret_dec)//hash
 	
 	//fmt.Printf("%s", secret_dec_hash)//wyświetlić, porównać z tym z decrypta
@@ -78,7 +85,7 @@ func main(){
 	if (abe.Encode(string(hash[:]))==message_pack.Plaintext_hash){
 		fmt.Printf("\nPlaintext hashes equal\n")
 	}
-	
+	start2 := time.Now()
 	ID:=message_pack.ID
 	fmt.Println(ID)
 	QID:=org.Crv.HashToGroup(ID, "G1")
@@ -107,6 +114,8 @@ func main(){
 	}else {
 		fmt.Println("Signature is not valid")
 	}
+	elapsed2 := time.Since(start2)
+    fmt.Printf("Verification took %s", elapsed2)
 }	
 
 
