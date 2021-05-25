@@ -107,7 +107,7 @@ func main(){
 	json.Unmarshal([]byte(VStr), V)
 	V.OfJsonObj(org.Crv)
 	L:=org.Crv.Pair(V, org.G2)
-	fmt.Println(U, QID, h, P_pub)
+
 	R:=org.Crv.Pair(org.Crv.Mul(U, org.Crv.Pow(QID, h)),P_pub)
 	L.ToJsonObj()
 	R.ToJsonObj()
