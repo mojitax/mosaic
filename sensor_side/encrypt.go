@@ -10,6 +10,7 @@ import (
     "crypto/sha256"
     "crypto/cipher"
     "crypto/rand"
+ 
 //	"encoding/hex"
     "errors"
     "bytes"
@@ -39,11 +40,7 @@ func main() {
         }
         
         brokerEndpoint := "18.221.34.191:1883"
-        mqttClient, err := initMQTT(brokerEndpoint, clientName)
-        if err != nil {
-            panic(fmt.Sprintf("failed to init mqtt client: %v", err))
-        }
-        fmt.Printf("> connected to %s\n", brokerEndpoint)
+        
         scanner := bufio.NewScanner(os.Stdin)
         for scanner.Scan() {
                 true_plaintext := []byte(scanner.Text())
@@ -55,7 +52,7 @@ func main() {
                 policyfile, _ := os.Open(policyPath)
                 policyreader := bufio.NewReader(policyfile)
                 policy, _:=policyreader.ReadString('\n')
-                //fmt.Printf("%s\n", policy)
+                
                 file, _ := os.Open("new_files/org.json")
                 reader := bufio.NewReader(file)
                 orgStr, _:=reader.ReadString('\n')
@@ -78,6 +75,7 @@ func main() {
                 if abe.CheckPolicyJson(policy, "") == "sat" {
                         // ecnrypting
                         secret := abe.NewRandomSecret(org)//nowy losowy klucz //new  random secret (treated as random symmetric key)
+                        fmt.Printf("%s\n", policy)
                         policy = abe.RewritePolicy(policy)//przepisanie polityki //rewriting policy
                         authpubs := abe.AuthPubsOfPolicy(policy)
                         for attr, _ := range authpubs.AuthPub {
@@ -161,15 +159,24 @@ func main() {
                         x, _:= json.Marshal(message_pack)
                         x_ := string(x)
                         fmt.Printf("\n%v\n", x_)
+                        mqttClient, err := initMQTT(brokerEndpoint, clientName)
+                        if err != nil {
+                                panic(fmt.Sprintf("failed to init mqtt client: %v", err))
+                        }
+                        fmt.Printf("> connected to %s\n", brokerEndpoint)
                         if token := mqttClient.Publish(messageTopic, 1, true, x_); token.Wait() && token.Error() != nil {//wysyłka do brokera //send-IT
                                 fmt.Printf("> failed to publish message: %v\n", token.Error())                       
-                        }
+                        } else {fmt.Println("sent")}
+                        //mqttClient.Disconnect(10000)
                 }
         }
 }
 
 func initMQTT(brokerEndpoint, clientID string) (mqtt.Client, error) {
         opts := mqtt.NewClientOptions()
+        opts.ConnectRetryInterval=time.Second
+        opts.ConnectRetry=true
+        opts.Order=false
         opts.AddBroker(brokerEndpoint)
         opts.SetClientID(clientID)
         opts.SetCleanSession(true)

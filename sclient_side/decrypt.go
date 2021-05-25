@@ -87,8 +87,9 @@ func main(){
 	}
 	start2 := time.Now()
 	ID:=message_pack.ID
-	fmt.Println(ID)
+	
 	QID:=org.Crv.HashToGroup(ID, "G1")
+	
 	s:=new(big.Int)
 	h:= s.SetBytes(hash[:])
 	file, _ = os.Open("new_files/sig_master_pub.json")
@@ -106,6 +107,7 @@ func main(){
 	json.Unmarshal([]byte(VStr), V)
 	V.OfJsonObj(org.Crv)
 	L:=org.Crv.Pair(V, org.G2)
+	fmt.Println(U, QID, h, P_pub)
 	R:=org.Crv.Pair(org.Crv.Mul(U, org.Crv.Pow(QID, h)),P_pub)
 	L.ToJsonObj()
 	R.ToJsonObj()
