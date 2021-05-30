@@ -42,6 +42,7 @@ func main(){
 	QID:=org.Crv.HashToGroup(ID, "G1")
 	s:=new(big.Int)
 	h:= s.SetBytes([]byte(hash))
+	h=h.Rsh(h, 2)
 	file, _ = os.Open("new_files/sig_master_pub.json")
 	reader = bufio.NewReader(file)
 	P_pubStr, _:=reader.ReadString('\n')
