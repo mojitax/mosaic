@@ -146,11 +146,11 @@ func main() {
 	                h:= s.SetBytes(hash[:])
                         h=h.Rsh(h, 2)
                         r:=org.Crv.NewRandomExp()
+                        r=r.Rsh(r, 1)
                         QID:=org.Crv.HashToGroup(clientName, "G1")
 	                U:=org.Crv.Pow(QID, r)
                         fmt.Println(r)
                         fmt.Println(h)
-                        fmt.Println(r.Add(r, h))
 	                V:=org.Crv.Pow(DID, r.Add(r, h))
 	                U.ToJsonObj()
                         V.ToJsonObj()
@@ -178,9 +178,6 @@ func main() {
 
 func initMQTT(brokerEndpoint, clientID string) (mqtt.Client, error) {
         opts := mqtt.NewClientOptions()
-        opts.ConnectRetryInterval=time.Second
-        opts.ConnectRetry=true
-        opts.Order=false
         opts.AddBroker(brokerEndpoint)
         opts.SetClientID(clientID)
         opts.SetCleanSession(true)

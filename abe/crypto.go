@@ -4,8 +4,8 @@ import (
 	"crypto/sha256"
 	"math/big"
 	"strings"
-	"fmt"
-	"time"
+
+
 	//"github.com/marcellop71/mosaic/abe/log"
 )
 
@@ -186,12 +186,12 @@ func Decrypt(ct *Ciphertext, userattrs *UserAttrs) (secret Point) {
 		for k, c := range cs {
 			if c != 0 {
 				userkey := userattrs.Userkey[attr]
-				start := time.Now()
+				
 				tmp := curve.ProdPair(
 					[]Point{ct.C[attr][k][1], ct.C[attr][k][2], userkey.KP},
 					[]Point{userkey.K, huser, ct.C[attr][k][3]})
-				elapsed := time.Since(start)
-				fmt.Printf("Pairing took %s", elapsed)
+				
+				
 				tmp = curve.Mul(tmp, ct.C[attr][k][0])
 				tmp = curve.Pow(tmp, big.NewInt(int64(c)))
 				S0 = curve.Mul(S0, tmp)

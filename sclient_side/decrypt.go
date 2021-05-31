@@ -16,7 +16,7 @@ import(
     "bytes"
    // "io"
    "math/big"
-   "time"
+ //  "time"
 )
 
 func main(){
@@ -54,14 +54,14 @@ func main(){
 	userattrs := new(abe.UserAttrs)
 	json.Unmarshal([]byte(userattrsStr), userattrs)
 	userattrs.OfJsonObj()
-	start := time.Now()
+
 	//same for keys
 	//otworzyliśmy klucze dla atrybutów
 	userattrs.SelectUserAttrs(userattrs.User, ciphertext.Policy)//okrajamy tylko do tych, które się przydadzą
 	//we choose only those keys which are required for decryption	
 	secret_dec := abe.Decrypt(ciphertext, userattrs)//deszyfracja //dec
-	elapsed := time.Since(start)
-    fmt.Printf("Decryption took %s", elapsed)
+
+    
 	secret_dec_hash := abe.SecretHash(secret_dec)//hash
 	
 	//fmt.Printf("%s", secret_dec_hash)//wyświetlić, porównać z tym z decrypta
@@ -85,7 +85,7 @@ func main(){
 	if (abe.Encode(string(hash[:]))==message_pack.Plaintext_hash){
 		fmt.Printf("\nPlaintext hashes equal\n")
 	}
-	start2 := time.Now()
+
 	ID:=message_pack.ID
 	
 	QID:=org.Crv.HashToGroup(ID, "G1")
@@ -108,7 +108,7 @@ func main(){
 	json.Unmarshal([]byte(VStr), V)
 	V.OfJsonObj(org.Crv)
 	L:=org.Crv.Pair(V, org.G2)
-
+	
 	R:=org.Crv.Pair(org.Crv.Mul(U, org.Crv.Pow(QID, h)),P_pub)
 	L.ToJsonObj()
 	R.ToJsonObj()
@@ -117,8 +117,7 @@ func main(){
 	}else {
 		fmt.Println("Signature is not valid")
 	}
-	elapsed2 := time.Since(start2)
-    fmt.Printf("Verification took %s", elapsed2)
+
 }	
 
 
