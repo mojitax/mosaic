@@ -36,8 +36,11 @@ Obtains signature keys from server and stores in new_files/user_sig_keys/sensor2
 ```bash
 go run -tags=z3,miracl sensor_side/encrypt.go -client sensor2 -policy sensor_side/policy
 ```
-Given the policy it encrypts message taken from stdin, signs with string stated in -client parameter and publishes to mqtt broker.
-
+Given the policy it encrypts message taken from stdin, signs with string stated in -client parameter.
+```bash
+go run -tags=z3,miracl sensor_side/encrypt.go -client sensor2 -policy sensor_side/policy -broker [ip:port]
+```
+Does the same, but connects to MQTT Broker and sends the ciphertext.
 client:
 (building docker)
 ```bash
