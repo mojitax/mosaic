@@ -28,9 +28,10 @@ func main() {
         //estabilishing broker connection
         var clientName string
         var policyPath string
+        var brokerAddr string
         flag.StringVar(&clientName, "client", "", "the client name")
         flag.StringVar(&policyPath, "policy", "", "path to policy")
-        
+        flag.StringVar(&brokerAddr, "broker", "", "broker address")
         flag.Parse()
         if len(clientName) == 0 {
             panic("-client is required")
@@ -38,8 +39,17 @@ func main() {
         if len(policyPath) == 0 {
             panic("-policy is required")
         }
+        //18.221.34.191:1883
+        var mqttClient mqtt.Client
+        if len(brokerAddr) != 0 {
+            mqttClient_, err := initMQTT(brokerAddr, clientName)
+            if err != nil {
+                panic(fmt.Sprintf("failed to init mqtt client: %v", err))
+            }
+            fmt.Printf("> connected to %s\n", brokerAddr)
+            mqttClient=mqttClient_
+        }
         
-        brokerEndpoint := "18.221.34.191:1883"
         
         scanner := bufio.NewScanner(os.Stdin)
         for scanner.Scan() {
@@ -163,14 +173,12 @@ func main() {
                         x, _:= json.Marshal(message_pack)
                         x_ := string(x)
                         fmt.Printf("\n%v\n", x_)
-                        mqttClient, err := initMQTT(brokerEndpoint, clientName)
-                        if err != nil {
-                                panic(fmt.Sprintf("failed to init mqtt client: %v", err))
+                       
+                        if len(brokerAddr) != 0 {
+                                if token := mqttClient.Publish(messageTopic, 1, true, x_); token.Wait() && token.Error() != nil {//wysyłka do brokera //send-IT
+                                        fmt.Printf("> failed to publish message: %v\n", token.Error())                       
+                                } else {fmt.Println("sent")}
                         }
-                        fmt.Printf("> connected to %s\n", brokerEndpoint)
-                        if token := mqttClient.Publish(messageTopic, 1, true, x_); token.Wait() && token.Error() != nil {//wysyłka do brokera //send-IT
-                                fmt.Printf("> failed to publish message: %v\n", token.Error())                       
-                        } else {fmt.Println("sent")}
                         //mqttClient.Disconnect(10000)
                 }
         }
