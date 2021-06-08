@@ -27,12 +27,17 @@ func main(){
 
     
 	var keysPath string
+	var ctPath string
     flag.StringVar(&keysPath, "keys", "", "path to keys")
+	flag.StringVar(&ctPath, "ct", "", "path to ct")
 	flag.Parse()
     if len(keysPath) == 0 {
         panic("-keys is required")
     }
-	file, _ := os.Open("new_files/ciphertext.json")
+    if len(ctPath) == 0 {
+        ctPath="new_files/ciphertext.json"
+    }
+	file, _ := os.Open(ctPath)
 	reader := bufio.NewReader(file)
 	message_pack_str, _:=reader.ReadString('\n')
 	message_pack := new(abe.Enc_and_Key)

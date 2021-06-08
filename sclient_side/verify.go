@@ -9,7 +9,7 @@ import(
 //	"crypto/aes"
 //    "crypto/sha256"
  //   "crypto/cipher"
-//	"flag"
+	"flag"
 //    "crypto/rand"
 //	"encoding/hex"
  //   "errors"
@@ -23,8 +23,13 @@ func main(){
 	//so we could make it read username and attributes from file as parameter, so far it's hardcoded 
 	//tu myślę że można dodać parametryzację przy uruchamianiu czyli -user marcello.paris@gmail.com -keyspath .../marcello.paris@gmail.com.json
 	//ale to do ustalenia
-	
-	file, _ := os.Open("new_files/ciphertext.json")
+	var ctPath string
+    flag.StringVar(&ctPath, "ct", "", "path to ct")
+	flag.Parse()
+    if len(ctPath) == 0 {
+        ctPath="new_files/ciphertext.json"
+    }
+	file, _ := os.Open(ctPath)
 	reader := bufio.NewReader(file)
 	message_pack_str, _:=reader.ReadString('\n')
 	message_pack := new(abe.Enc_and_Key)
