@@ -59,6 +59,10 @@ Obtains last message in mqtt broker and stores it to new_files/ciphertext.json
 go run -tags=z3,miracl sclient_side/decrypt.go -keys new_files/user_keys/[client_id].json
 ```
 Decrypts, compares hashes, verifies authenticity from signature.
+```bash
+go run -tags=z3,miracl sclient_side/verify.go 
+```
+Verifies only the signature part of ciphertext.json.
 # Mosaic
 
 *Mosaic* is a library doing Attribute Based Encryption (ABE). It is meant to be used as a example of a cryptographic core to be embedded in any solution willing to rely on an ABE scheme of this kind
