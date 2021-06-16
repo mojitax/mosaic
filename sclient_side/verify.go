@@ -35,7 +35,7 @@ func main(){
 	message_pack := new(abe.Enc_and_Key)
 	json.Unmarshal([]byte(message_pack_str), message_pack)
 
-	file, _ = os.Open("new_files/org.json")
+	file, _ = os.Open("new_files/org2.json")
 	reader = bufio.NewReader(file)
 	orgStr, _:=reader.ReadString('\n')
 	org := new(abe.Org)
