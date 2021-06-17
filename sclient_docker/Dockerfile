@@ -10,7 +10,7 @@ RUN yum install -y \
     net-tools pciutils htop wget unzip git telnet which tar lzip
 
 RUN yum install -y \
-    make autoconf automake libtool gcc clang cmake3
+    make autoconf automake libtool gcc clang cmake
 
 RUN yum install -y \
     flex bison
