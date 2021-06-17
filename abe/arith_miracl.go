@@ -45,6 +45,7 @@ func (p *MiraclPoint) ToJsonObj() Point {
 	buf := make([]byte, 12*crv.MODBYTES)
 	switch p.Group {
 	case "G1":
+		buf=make([]byte, 2*crv.MODBYTES+1)
 		p.p1.ToBytes(buf, false)
 	case "G2":
 		p.p2.ToBytes(buf, false)
