@@ -1,49 +1,47 @@
 package main
 
+
 import (
-	"mosaic/abe"
-	"mosaic/abe/log"
+	"github.com/go-ldap/ldap/v3"
+	"log"
+	"fmt"
 )
 
 func main() {
-	log.Init("Info")
-
-	seed := "abcdef"
-	curve := abe.NewCurve()
-	curve.SetSeed(seed).InitRng()
-	org := abe.NewRandomOrg(curve)
-	authkeys := abe.NewRandomAuth(org)
-	user := "marcello.paris@gmail.com"
-
-	policies := []string{
-		"A@auth0",
+	l, err := ldap.DialURL("ldap://13.51.158.214:6061")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer l.Close()
+	err = l.Bind( "pawel", "1234")
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	for _, policy := range policies {
-		log.Info("----------------")
-		log.Info("policy: %s", policy)
+	fmt.Println("stop")
 
-		// ecnrypting
-		secret := abe.NewRandomSecret(org)
-		policy = abe.RewritePolicy(policy)
-		authpubs := abe.AuthPubsOfPolicy(policy)
-		for attr, _ := range authpubs.AuthPub {
-			authpubs.AuthPub[attr] = authkeys.AuthPub
-		}
-		ct := abe.Encrypt(secret, policy, authpubs)
+	searchRequest := ldap.NewSearchRequest(
+		"ou=Users,dc=WSO2,dc=ORG", // The base dn to search
+		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
+		"((name=pawel))", // The filter to apply
+		[]string{"name", "requestedAttrubutes", "requestedFilters"},                    // A list attributes to retrieve
+		nil,
+	)
 
-		// decrypting
-		userattrs_A := abe.NewRandomUserkey(user, "A@auth0", authkeys.AuthPrv)
-		userattrs_B := abe.NewRandomUserkey(user, "B@auth0", authkeys.AuthPrv)
-		userattrs := userattrs_A.Add(userattrs_B)
-		userattrs.SelectUserAttrs(user, policy)
-
-		secret_dec := abe.Decrypt(ct, userattrs)
-
-		if abe.SecretHash(secret) == abe.SecretHash(secret_dec) {
-			log.Info("secret correctly reconstructed")
-		} else {
-			log.Info("secret not correctly reconstructed")
-		}
+	sr, err := l.Search(searchRequest)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, entry := range sr.Entries {
+		fmt.Printf("%s: %v\n", entry.DN, entry.GetAttributeValue("requestedAttrubutes"))
+	}
+	for _, entry := range sr.Entries {
+		fmt.Printf("%s: %v\n", entry.DN, entry.GetAttributeValue("requestedFilters"))
+	}
+	for _, entry := range sr.Entries {
+		fmt.Printf("%s\n", entry)
+	}
+	for _, entry := range sr.Entries {
+		fmt.Printf("%s: %v\n", entry.DN, entry.GetAttributeValue("memberof"))
 	}
 }
