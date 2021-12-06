@@ -10,6 +10,7 @@ import (
 	"strings"
 	"math/big"
 	"fmt"
+	"github.com/go-ldap/ldap/v3"
 )
 
 type Server struct {
@@ -50,19 +51,56 @@ func (s *Server) SayHello(ctx context.Context, in *Message) (*Message, error) {
 
 	} 
 	if (len(attr_array)>1){
-	userattrs:=abe.NewRandomUserkey(attr_array[0], attr_array[1], authprv)
-	for nr, attribute := range attr_array {
-		if (nr<2) {
-			continue
+		l, err := ldap.DialURL("ldap://44.199.255.188:6061")
+		if err != nil {
+			log.Fatal(err)
 		}
-		userattrs.Add(abe.NewRandomUserkey(attr_array[0], attribute, authprv))//dodawane kolejne //more atts
-	}
-	userattrs.ToJsonObj()//trzeba zrobić jsony z wewnętrznych obiektów, żeby zapisać do pliku coś poza nicniewartymi referencjami
-	//creating jsons as described earlier
-	file2,_:=os.Create("new_files/user_keys/"+attr_array[0]+".json")//plik tworzony jest z nazwą użytkownika
-	userattrsJson, _ :=json.Marshal(userattrs)//zawijania do json stringa
-	file2.WriteString(string(userattrsJson))//zapis
+		name:=attr_array[0]
+		parts := strings.Split(name, "@")
+		err = l.Bind( "pawel@org1", "1234")
+		if err != nil {
+			log.Fatal(err)
+		}
+	
+		attrlist:=attr_array[1:]
+		searchRequest := ldap.NewSearchRequest(
+			"aaaa", // The base dn to search
+			ldap.ScopeWholeSubtree, 0, 0, 0, false,
+			fmt.Sprintf("(name=%s)", parts[0]),
+			attrlist,                    // A list attributes to retrieve
+			nil,
+		)
+	
+		sr, err := l.Search(searchRequest)
+		if err != nil {
+			log.Fatal(err)
+		}
+		given_attrs:=[]string{name}
+		for _, entry := range sr.Entries {
+			for _, att := range attrlist {
+				fmt.Printf("%s: %v\n", entry.DN, entry.GetAttributeValue(att))
+				if string(entry.GetAttributeValue(att))!="" {
+					given_attrs=append(given_attrs,string(entry.GetAttributeValue(att)))
+				}
+			}
+			
+		}
 
-	return &Message{Body: string(userattrsJson)}, nil}
+		if (len(given_attrs)>1){
+		userattrs:=abe.NewRandomUserkey(given_attrs[0], given_attrs[1], authprv)
+		for nr, attribute := range given_attrs {
+			if (nr<2) {
+				continue
+			}
+			userattrs.Add(abe.NewRandomUserkey(given_attrs[0], attribute, authprv))//dodawane kolejne //more atts
+		}
+		userattrs.ToJsonObj()//trzeba zrobić jsony z wewnętrznych obiektów, żeby zapisać do pliku coś poza nicniewartymi referencjami
+		//creating jsons as described earlier
+		file2,_:=os.Create("new_files/user_keys/"+attr_array[0]+".json")//plik tworzony jest z nazwą użytkownika
+		userattrsJson, _ :=json.Marshal(userattrs)//zawijania do json stringa
+		file2.WriteString(string(userattrsJson))//zapis
+
+		return &Message{Body: string(userattrsJson)}, nil}}
+
 	return &Message{Body: "error!!!"}, nil
 }
