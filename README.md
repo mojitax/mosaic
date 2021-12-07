@@ -1,8 +1,12 @@
 plik attributes:
 pierwszy wiersz to nazwa użytkownika np. "pawel@org1", z tym że część przed @ to jest to co będzie przeszukiwane w ldap zapytaniem "(name=pawel)"
+
 kolejne wiersze to nazwy atrybutów czyli np. "atrybutX", którego wartość w ldap jest w przykładzie "atr1"
+
 zwrócony klucz będzie związany ponadto z drugą częścią pierwszego wiersza, czyli tym co po @: "org1"
+
 klucz dla atrybutu "atr1" to tak naprawdę klucz dla "atr1@org1"
+
 jeśli użytkownik nie ma atrybutu o podanej w pliku nazwie, np atrybutZ nie istnieje to zostanie on pominięty
 # new stuff
 Mojitto: 
