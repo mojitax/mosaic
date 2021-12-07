@@ -80,27 +80,29 @@ func (s *Server) SayHello(ctx context.Context, in *Message) (*Message, error) {
 			for _, att := range attrlist {
 				fmt.Printf("%s: %v\n", entry.DN, entry.GetAttributeValue(att))
 				if string(entry.GetAttributeValue(att))!="" {
-					given_attrs=append(given_attrs,string(entry.GetAttributeValue(att)))
+					given_attrs=append(given_attrs,string(entry.GetAttributeValue(att))+"@"+parts[1])
 				}
 			}
 			
 		}
 
 		if (len(given_attrs)>1){
-		userattrs:=abe.NewRandomUserkey(given_attrs[0], given_attrs[1], authprv)
-		for nr, attribute := range given_attrs {
-			if (nr<2) {
-				continue
+			userattrs:=abe.NewRandomUserkey(given_attrs[0], given_attrs[1], authprv)
+			for nr, attribute := range given_attrs {
+				if (nr<2) {
+					continue
+				}
+				userattrs.Add(abe.NewRandomUserkey(given_attrs[0], attribute, authprv))//dodawane kolejne //more atts
 			}
-			userattrs.Add(abe.NewRandomUserkey(given_attrs[0], attribute, authprv))//dodawane kolejne //more atts
-		}
-		userattrs.ToJsonObj()//trzeba zrobić jsony z wewnętrznych obiektów, żeby zapisać do pliku coś poza nicniewartymi referencjami
-		//creating jsons as described earlier
-		file2,_:=os.Create("new_files/user_keys/"+attr_array[0]+".json")//plik tworzony jest z nazwą użytkownika
-		userattrsJson, _ :=json.Marshal(userattrs)//zawijania do json stringa
-		file2.WriteString(string(userattrsJson))//zapis
+			userattrs.ToJsonObj()//trzeba zrobić jsony z wewnętrznych obiektów, żeby zapisać do pliku coś poza nicniewartymi referencjami
+			//creating jsons as described earlier
+			file2,_:=os.Create("new_files/user_keys/"+attr_array[0]+".json")//plik tworzony jest z nazwą użytkownika
+			userattrsJson, _ :=json.Marshal(userattrs)//zawijania do json stringa
+			file2.WriteString(string(userattrsJson))//zapis
 
-		return &Message{Body: string(userattrsJson)}, nil}}
+			return &Message{Body: string(userattrsJson)}, nil}}
+		else {
+			return &Message{Body: "Brak atrybutow w LDAP"}, nil}
 
 	return &Message{Body: "error!!!"}, nil
 }
