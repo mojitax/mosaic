@@ -48,8 +48,8 @@ RUN cd /source && \
 #    echo "/usr/local/lib" > /etc/ld.so.conf.d/pbc.conf && ldconfig -v && \
 #    rm -rf /source/pbc-0.5.14
 
-RUN wget https://dl.google.com/go/go1.14.2.linux-amd64.tar.gz && \
-    tar -C /usr/local -xzf go1.14.2.linux-amd64.tar.gz
+RUN wget https://dl.google.com/go/go1.17.3.linux-amd64.tar.gz && \
+    tar -C /usr/local -xzf go1.17.3.linux-amd64.tar.gz
 
 RUN yum install -y \
     redis
