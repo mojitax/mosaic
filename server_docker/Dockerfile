@@ -48,8 +48,8 @@ RUN cd /source && \
 #    echo "/usr/local/lib" > /etc/ld.so.conf.d/pbc.conf && ldconfig -v && \
 #    rm -rf /source/pbc-0.5.14
 
-RUN wget https://dl.google.com/go/go1.14.2.linux-amd64.tar.gz && \
-    tar -C /usr/local -xzf go1.14.2.linux-amd64.tar.gz
+RUN wget https://dl.google.com/go/go1.17.3.linux-amd64.tar.gz && \
+    tar -C /usr/local -xzf go1.17.3.linux-amd64.tar.gz
 
 RUN yum install -y \
     redis
@@ -63,6 +63,7 @@ RUN yum install -y \
 
 ENV PATH="${PATH}:/usr/local/go/bin"
 RUN go get google.golang.org/grpc
+RUN go get github.com/go-ldap/ldap/v3
 RUN mkdir /mosaic
 ADD ./abe /mosaic/abe
 ADD ./lib/mosaic.go /mosaic/lib
@@ -77,6 +78,7 @@ RUN cp /mosaic/server_side/sig_master_secret.json /mosaic/new_files
 RUN cp /mosaic/server_side/org.json /mosaic/new_files
 WORKDIR /mosaic
 EXPOSE 9000
-
+RUN go get github.com/go-ldap/ldap/v3
+RUN go mod tidy
 
 CMD ["/bin/bash"]
