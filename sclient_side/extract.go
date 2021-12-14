@@ -14,15 +14,25 @@ import (
 
 func main() {
     var attrsPath string
+	var id string
+	var pass string
     flag.StringVar(&attrsPath, "attrs", "", "path to attributes")
+	flag.StringVar(&id, "id", "", "id")
+	flag.StringVar(&pass, "pass", "", "password")
 	flag.Parse()
     if len(attrsPath) == 0 {
         panic("-attrs is required")
     }
+	if len(id) == 0 {
+        panic("-id is required")
+    }
+	if len(pass) == 0 {
+        panic("-pass is required")
+    }
 	
     attrs, _:=ioutil.ReadFile(attrsPath)
-    fmt.Printf("%s\n", string(attrs))
-	
+	sattrs:=id+"\n"+pass+"\n"+string(attrs)
+	fmt.Printf("%s\n", sattrs)
 	var conn *grpc.ClientConn
 	conn, err := grpc.Dial("18.117.226.33:9000", grpc.WithInsecure())
 	if err != nil {
@@ -32,7 +42,7 @@ func main() {
 
 	c := chat.NewChatServiceClient(conn)
 
-	response, err := c.SayHello(context.Background(), &chat.Message{Body: string(attrs)})
+	response, err := c.SayHello(context.Background(), &chat.Message{Body: string(sattrs)})
 	if err != nil {
 		log.Fatalf("Error when calling SayHello: %s", err)
 	}
