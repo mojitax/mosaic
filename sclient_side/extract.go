@@ -47,7 +47,7 @@ func main() {
 		log.Fatalf("Error when calling SayHello: %s", err)
 	}
 	log.Printf("Response from server: %s", response.Body)
-	first := strings.Split(string(attrs), "\n") 
+	first := strings.Split(string(sattrs), "\n") 
 	file,_:=os.Create("new_files/user_keys/"+first[0]+".json")//plik tworzony jest z nazwą użytkownika
 	file.WriteString(response.Body)//zapis
 }
