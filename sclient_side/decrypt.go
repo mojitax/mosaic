@@ -30,6 +30,7 @@ func main(){
 	var ctPath string
     flag.StringVar(&keysPath, "keys", "", "path to keys")
 	flag.StringVar(&ctPath, "ct", "", "path to ct")
+	signflag:=flag.Bool("s", false, "check signature")
 	flag.Parse()
     if len(keysPath) == 0 {
         panic("-keys is required")
@@ -91,36 +92,42 @@ func main(){
 		fmt.Printf("\nPlaintext hashes equal\n")
 	}
 
-	ID:=message_pack.ID
-	
-	QID:=org.Crv.HashToGroup(ID, "G1")
-	
-	s:=new(big.Int)
-	h:= s.SetBytes(hash[:])
-	h=h.Rsh(h, 2)
-	file, _ = os.Open("new_files/sig_master_pub.json")
-	reader = bufio.NewReader(file)
-	P_pubStr, _:=reader.ReadString('\n')
-	P_pub:=new(abe.MiraclPoint)
-	json.Unmarshal([]byte(P_pubStr), P_pub)
-	P_pub.OfJsonObj(org.Crv)
-	UStr:=message_pack.Signature_U
-	U := new(abe.MiraclPoint)
-	json.Unmarshal([]byte(UStr), U)
-	U.OfJsonObj(org.Crv)
-	VStr:=message_pack.Signature_V
-	V := new(abe.MiraclPoint)
-	json.Unmarshal([]byte(VStr), V)
-	V.OfJsonObj(org.Crv)
-	L:=org.Crv.Pair(V, org.G2)
-	
-	R:=org.Crv.Pair(org.Crv.Mul(U, org.Crv.Pow(QID, h)),P_pub)
-	L.ToJsonObj()
-	R.ToJsonObj()
-	if(L.GetP()==R.GetP()){
-		fmt.Println("Signature is valid")
-	}else {
-		fmt.Println("Signature is not valid")
+	if *signflag{
+		if message_pack.Signature_U != "none" {
+			ID:=message_pack.ID
+			
+			QID:=org.Crv.HashToGroup(ID, "G1")
+			
+			s:=new(big.Int)
+			h:= s.SetBytes(hash[:])
+			h=h.Rsh(h, 2)
+			file, _ = os.Open("new_files/sig_master_pub.json")
+			reader = bufio.NewReader(file)
+			P_pubStr, _:=reader.ReadString('\n')
+			P_pub:=new(abe.MiraclPoint)
+			json.Unmarshal([]byte(P_pubStr), P_pub)
+			P_pub.OfJsonObj(org.Crv)
+			UStr:=message_pack.Signature_U
+			U := new(abe.MiraclPoint)
+			json.Unmarshal([]byte(UStr), U)
+			U.OfJsonObj(org.Crv)
+			VStr:=message_pack.Signature_V
+			V := new(abe.MiraclPoint)
+			json.Unmarshal([]byte(VStr), V)
+			V.OfJsonObj(org.Crv)
+			L:=org.Crv.Pair(V, org.G2)
+			
+			R:=org.Crv.Pair(org.Crv.Mul(U, org.Crv.Pow(QID, h)),P_pub)
+			L.ToJsonObj()
+			R.ToJsonObj()
+			if(L.GetP()==R.GetP()){
+				fmt.Println("Signature is valid")
+			}else {
+				fmt.Println("Signature is not valid")
+			}
+		} else {
+			fmt.Println("No signature")
+		}
 	}
 
 }	
