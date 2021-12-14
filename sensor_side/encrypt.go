@@ -173,8 +173,8 @@ func main() {
                                 VJson, _:=json.Marshal(V)
                                 message_pack.Signature_U = string(UJson)
                                 message_pack.Signature_V = string(VJson)
-                                message_pack.Plaintext_hash = abe.Encode(string(hash[:]))}
-                        else{   
+                                message_pack.Plaintext_hash = abe.Encode(string(hash[:]))
+			} else {   
                                 hash:=sha256.Sum256([]byte(true_plaintext))
                                 message_pack.ID=clientName
                                 message_pack.Signature_U = "none"
