@@ -1,13 +1,21 @@
-plik attributes:
-pierwszy wiersz to nazwa użytkownika np. "pawel@org1", z tym że część przed @ to jest to co będzie przeszukiwane w ldap zapytaniem "(name=pawel)"
+Zmiany:
+Plik attributes:
+Wiersze to poszczególne atrybuty, które dostaną dopisek domeny np @org1 , w obrębie której się znajdują na podstawie loginu.
 
-kolejne wiersze to nazwy atrybutów czyli np. "atrybutX", którego wartość w ldap jest w przykładzie "atr1"
+Nowy extract z id i hasłem do ldap:
+```bash
+go run -tags=z3,miracl sclient_side/extract.go -attrs sclient_side/attributes -id [id] -pass [pass]
+```
 
-zwrócony klucz będzie związany ponadto z drugą częścią pierwszego wiersza, czyli tym co po @: "org1"
+Encrypt posiada teraz opcjonalny podpis z parametrem -s:
+```bash
+go run -tags=z3,miracl sensor_side/encrypt.go -client sensor2 -policy sensor_side/policy -broker [ip:port] -s
+```
+Decrypt domyślnie działa teraz bez sprawdzania podpisu. Aby sprawdzić podpis należy przekazać parametr -s:
+```bash
+go run -tags=z3,miracl sclient_side/decrypt.go -s -keys new_files/user_keys/[client_id].json
+```
 
-klucz dla atrybutu "atr1" to tak naprawdę klucz dla "atr1@org1"
-
-jeśli użytkownik nie ma atrybutu o podanej w pliku nazwie, np atrybutZ nie istnieje to zostanie on pominięty
 # new stuff
 Mojitto: 
 Pre-demo: DON'T DO THIS!!!
