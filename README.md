@@ -2,7 +2,7 @@
 
 Plik attributes:
 
-Wiersze to poszczególne atrybuty, które dostaną dopisek domeny np @org1 , w obrębie której się znajdują na podstawie loginu.
+Wiersze to poszczególne atrybuty (dostaną później dopisek domeny np. @org1, w obrębie której się znajdują na podstawie loginu).
 
 Nowy extract z id i hasłem do ldap:
 ```bash
