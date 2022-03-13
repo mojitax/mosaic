@@ -57,12 +57,12 @@ func (s *Server) SayHello(ctx context.Context, in *Message) (*Message, error) {
 		}
 		name:=attr_array[0]
 		parts := strings.Split(name, "@")
-		err = l.Bind( "pawel@org1", "1234")
+		err = l.Bind( name, attr_array[1])
 		if err != nil {
 			log.Fatal(err)
 		}
 	
-		attrlist:=attr_array[1:]
+		attrlist:=attr_array[2:]
 		searchRequest := ldap.NewSearchRequest(
 			"aaaa", // The base dn to search
 			ldap.ScopeWholeSubtree, 0, 0, 0, false,
@@ -99,10 +99,10 @@ func (s *Server) SayHello(ctx context.Context, in *Message) (*Message, error) {
 			file2,_:=os.Create("new_files/user_keys/"+attr_array[0]+".json")//plik tworzony jest z nazwą użytkownika
 			userattrsJson, _ :=json.Marshal(userattrs)//zawijania do json stringa
 			file2.WriteString(string(userattrsJson))//zapis
-
-			return &Message{Body: string(userattrsJson)}, nil}}
+			return &Message{Body: string(userattrsJson)}, nil}
 		else {
 			return &Message{Body: "Brak atrybutow w LDAP"}, nil}
 
 	return &Message{Body: "error!!!"}, nil
+}
 }
