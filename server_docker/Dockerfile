@@ -2,7 +2,10 @@ FROM centos:latest
 MAINTAINER Marcello Paris <marcello.paris@gmail.com>
 
 RUN mkdir /source
-
+RUN cd /etc/yum.repos.d/
+RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+RUN sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+RUN yum update -y
 RUN yum install -y \
     epel-release
 
@@ -20,15 +23,17 @@ RUN yum install -y \
 
 RUN python3 -m pip install --upgrade pip setuptools
 
+RUN yum groupinstall "Development Tools" -y || true
+
 # building z3 from sources
 RUN cd /source && \
-    wget https://github.com/Z3Prover/z3/archive/z3-4.8.7.tar.gz && \
-    tar xvf z3-4.8.7.tar.gz && \
-    cd z3-z3-4.8.7 && \
+    wget https://github.com/Z3Prover/z3/archive/z3-4.8.15.tar.gz && \
+    tar xvf z3-4.8.15.tar.gz && \
+    cd z3-z3-4.8.15 && \
     python3 scripts/mk_make.py && \
     cd build && \
     make -j 8 && make install && \
-    rm -rf /source/z3-z3-4.8.7
+    rm -rf /source/z3-z3-4.8.15
 
 # building gmp from sources
 #RUN cd /source && \
@@ -62,6 +67,7 @@ RUN yum install -y \
 #    git clone https://github.com/miracl/MIRACL
 
 ENV PATH="${PATH}:/usr/local/go/bin"
+ENV LDAPADDR="ldap://ldap.semaciti.net:6061"
 RUN go get google.golang.org/grpc
 RUN go get github.com/go-ldap/ldap/v3
 RUN mkdir /mosaic
