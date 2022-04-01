@@ -62,6 +62,7 @@ RUN yum install -y \
 #    git clone https://github.com/miracl/MIRACL
 
 ENV PATH="${PATH}:/usr/local/go/bin"
+ENV KGCADDR="44.202.188.26:9000"
 RUN go get google.golang.org/grpc
 RUN mkdir /mosaic
 ADD ./abe /mosaic/abe
