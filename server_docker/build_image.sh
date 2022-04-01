@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PROJECT_NAME=mosaic
+PROJECT_NAME=mosaic_server
 
 MACHINE=`uname -m`
 KERNEL=`uname -s`
