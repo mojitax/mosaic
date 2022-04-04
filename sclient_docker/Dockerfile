@@ -24,13 +24,13 @@ RUN python3 -m pip install --upgrade pip setuptools
 
 # building z3 from sources
 RUN cd /source && \
-    wget https://github.com/Z3Prover/z3/archive/z3-4.8.7.tar.gz && \
-    tar xvf z3-4.8.7.tar.gz && \
-    cd z3-z3-4.8.7 && \
+    wget https://github.com/Z3Prover/z3/archive/z3-4.8.15.tar.gz && \
+    tar xvf z3-4.8.15.tar.gz && \
+    cd z3-z3-4.8.15 && \
     python3 scripts/mk_make.py && \
     cd build && \
     make -j 8 && make install && \
-    rm -rf /source/z3-z3-4.8.7
+    rm -rf /source/z3-z3-4.8.15
 
 # building gmp from sources
 #RUN cd /source && \
