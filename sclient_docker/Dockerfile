@@ -2,9 +2,11 @@ FROM centos:latest
 MAINTAINER Marcello Paris <marcello.paris@gmail.com>
 
 RUN mkdir /source
+RUN cd /etc/yum.repos.d/
 RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
 RUN sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
 RUN yum update -y
+
 RUN yum install -y \
     epel-release
 
@@ -31,7 +33,6 @@ RUN cd /source && \
     cd build && \
     make -j 8 && make install && \
     rm -rf /source/z3-z3-4.8.15
-
 # building gmp from sources
 #RUN cd /source && \
 #    wget https://gmplib.org/download/gmp/gmp-6.2.0.tar.lz && \
@@ -64,7 +65,6 @@ RUN yum install -y \
 #    git clone https://github.com/miracl/MIRACL
 
 ENV PATH="${PATH}:/usr/local/go/bin"
-ENV KGCADDR="44.202.188.26:9000"
 RUN go get google.golang.org/grpc
 RUN mkdir /mosaic
 ADD ./abe /mosaic/abe
@@ -75,8 +75,13 @@ ADD ./sclient_side /mosaic/sclient_side
 RUN mkdir /mosaic/new_files
 RUN mkdir /mosaic/new_files/user_keys
 RUN cp /mosaic/sclient_side/attributes /mosaic/new_files
+RUN cp /mosaic/sclient_side/ct1 /mosaic/new_files
+RUN cp /mosaic/sclient_side/ct2 /mosaic/new_files
 RUN cp /mosaic/sclient_side/sig_master_pub.json /mosaic/new_files
 RUN cp /mosaic/sclient_side/org.json /mosaic/new_files
+#WORKDIR /mosaic/sclient_side/RPI_Registration
+#RUN go run Registration.go
 WORKDIR /mosaic
-
+RUN go get github.com/xlzd/gotp
+#RUN go run /sclient_side/RPI_Registration/Registration.go
 CMD ["/bin/bash"]
