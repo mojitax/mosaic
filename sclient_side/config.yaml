@@ -1,0 +1,20 @@
+#Temporary ID
+Temporary_ID: "IoTTEST"
+#Temporary Key
+Temporary_Key: "12345678901234567890123456789012"
+#ID of device
+ID: "kk@org1"
+#Key for HMAC (It is using in process of creating a hash of parameters)
+Hash_Key:
+#Count of Params
+CountOfParams: 5
+#Address of Application Gateway
+AG_IP: "18.204.21.226"
+#Application Gateway Port
+AG_Port: "8080"
+#Listen IP (sould be localhost)
+Listen_IP: "127.0.0.1"
+#Listen Port
+Listen_Port: 6789
+#Port to communicate with other devices
+Listen_Port_For_Others: 6790
