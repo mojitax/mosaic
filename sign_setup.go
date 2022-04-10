@@ -63,7 +63,7 @@ func main(){
 	fmt.Println(U)
 	fmt.Println(V)
 	//verify
-	ID="sensor_chuj"
+	ID="sensor"
 	QID=org.Crv.HashToGroup(ID, "G1")
 	L:=org.Crv.Pair(V, org.G2)
 	R:=org.Crv.Pair(org.Crv.Mul(U, org.Crv.Pow(QID, h)),p)
