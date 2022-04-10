@@ -1,0 +1,10 @@
+sudo udevadm  info -a -n /dev/mmcblk0 | grep serial | awk -F '"' '{print $2}'
+sudo udevadm  info -a -n /dev/mmcblk0 | grep cid | awk -F '"' '{print $2}'
+sudo blkid | grep PTUUID | awk '{print $2}' | awk -F '"' '{print $2}'
+sudo blkid | grep root | awk '{print $3}' | awk -F '"' '{print $2}'
+sudo blkid | grep boot | awk '{print $4}' | awk -F '"' '{print $2}'
+sudo blkid | grep SETTINGS | awk '{print $3}' | awk -F '"' '{print $2}'
+sudo blkid | grep RECOVERY | awk '{print $4}' | awk -F '"' '{print $2}'
+sudo cat /etc/shadow | grep pi | awk -F '$' '{print $3}'
+sudo cat /etc/shadow | grep pi | awk -F '$' '{print $4}'  | awk -F ':' '{print $1}' | cut -c 44-
+sudo cat /etc/shadow | grep pi | awk -F '$' '{print $4}'  | awk -F ':' '{print $1}' | cut -c -44
