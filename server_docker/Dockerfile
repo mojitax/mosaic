@@ -67,7 +67,7 @@ RUN yum install -y \
 #    git clone https://github.com/miracl/MIRACL
 
 ENV PATH="${PATH}:/usr/local/go/bin"
-ENV LDAPADDR="ldap://ldap.semaciti.net:6061"
+ENV LDAPADDR="ldap://ldap.semaciti.net:6062"
 RUN go get google.golang.org/grpc
 RUN go get github.com/go-ldap/ldap/v3
 RUN mkdir /mosaic
@@ -85,6 +85,6 @@ RUN cp /mosaic/server_side/org.json /mosaic/new_files
 WORKDIR /mosaic
 EXPOSE 9000
 RUN go get github.com/go-ldap/ldap/v3
-RUN go mod tidy
+#RUN go mod tidy
 
 CMD ["/bin/bash"]
