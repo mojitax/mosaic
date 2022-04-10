@@ -16,6 +16,34 @@ import (
 type Server struct {
 }
 
+type Auth struct {
+	ID      string `json:"ID"`
+	Indexes []int  `json:"indexes"`
+	TOTP    string `json:"TOTP"`
+	Attributes []string `json:"Attributes"`
+}
+type JEntry struct {
+	// DN is the distinguished name of the entry
+	DN string `json:"ID"`
+	// Attributes are the returned attributes for the entry
+	Attributes []JEntryAttribute `json:"attributes"`
+}
+type JEntryAttribute struct {
+	// Name is the name of the attribute
+	Name string `json:"name"`
+	// Values contain the string values of the attribute
+	Value string `json:"value"`
+}
+func convertToEntry (in *JEntry) (*ldap.Entry){
+	entry:=new(ldap.Entry)
+	entry.DN=in.DN
+	var attributes []*ldap.EntryAttribute
+	for _, row := range in.Attributes{
+		attributes = append(attributes, &ldap.EntryAttribute{row.Name, []string{row.Value}, nil}) 
+	}
+	entry.Attributes=attributes
+	return entry
+}
 func (s *Server) SayHello(ctx context.Context, in *Message) (*Message, error) {
 	log.Printf("Receive message body from client: %s", in.Body)
 	
@@ -26,8 +54,11 @@ func (s *Server) SayHello(ctx context.Context, in *Message) (*Message, error) {
 	authprv := new(abe.AuthPrv)
     json.Unmarshal([]byte(authprvStr), authprv)
     authprv.OfJsonObj()
-	attr_array := strings.Split(in.Body, "\n")
-	if(len(attr_array)==1){
+	in_message:=new(Auth)
+	json.Unmarshal([]byte(in.Body), in_message)
+	attr_array := in_message.Attributes
+	//log.Printf("json: %s", string(in_message.Attributes))
+	if(len(attr_array)==0 && in_message.TOTP!="" ){
 		org:=authprv.Org
 		file, _ = os.Open("new_files/sig_master_pub.json")
 		reader = bufio.NewReader(file)
@@ -42,7 +73,7 @@ func (s *Server) SayHello(ctx context.Context, in *Message) (*Message, error) {
     	if !ok {
         fmt.Println("SetString: error")
     	}
-		ID:=attr_array[0]
+		ID:=in_message.ID
 		QID:=org.Crv.HashToGroup(ID, "G1")
 		DID:=org.Crv.Pow(QID, s)
 		DID.ToJsonObj()
@@ -50,28 +81,46 @@ func (s *Server) SayHello(ctx context.Context, in *Message) (*Message, error) {
 		return &Message{Body: string(DID_json)}, nil
 
 	} 
-	if (len(attr_array)>1){
-		fmt.Printf("pre-dial")
+	if (len(attr_array)>0){
+		
 		l, err := ldap.DialURL(os.Getenv("LDAPADDR"))
 		
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Printf("post-dial")
-		name:=attr_array[0]
+		
+		name:="kk@org1"//im_message.ID
 		parts := strings.Split(name, "@")
-		fmt.Printf("pre-bind")
-		err = l.Bind( name, attr_array[1])
+		attrlist:=[]string{}
+		attrlist=append(attrlist, attr_array...)
+		err = l.Bind( name, in_message.TOTP)
+		sr:="{\"ID\":\"kk@org1\",\"attributes\":[{\"name\":\"miasto\",\"value\":\"warszawa\"},{\"name\":\"ulica\",\"value\":\"nowa\"},{\"name\":\"imie\",\"value\":\"krzysztof\"}]}"
+		testEntry:=new(JEntry)
+	   	json.Unmarshal([]byte(sr), testEntry)
+		propEntry:=convertToEntry(testEntry)	
 		if err != nil {
+			fmt.Println("Can't bind to LDAP, running example mode")
+		} else {
+			searchRequest := ldap.NewSearchRequest(
+				"org1", // The base dn to search
+				ldap.ScopeWholeSubtree, 0, 0, 0, false,
+				fmt.Sprintf("(name=%s)", name),
+				attrlist,                    // A list attributes to retrieve
+				nil,
+			)
+			fmt.Printf("pre-search")
+			sres, err := l.Search(searchRequest)
+			propEntry=sres.Entries[0]
+			if err != nil {
 			log.Fatal(err)
+			}
 		}
-		fmt.Printf("post-bind")
-	
-		attrlist:=attr_array[2:]
-		searchRequest := ldap.NewSearchRequest(
+		
+		
+		/*searchRequest := ldap.NewSearchRequest(
 			"org1", // The base dn to search
 			ldap.ScopeWholeSubtree, 0, 0, 0, false,
-			fmt.Sprintf("(name=%s)", parts[0]),
+			fmt.Sprintf("(name=%s)", name),
 			attrlist,                    // A list attributes to retrieve
 			nil,
 		)
@@ -79,18 +128,18 @@ func (s *Server) SayHello(ctx context.Context, in *Message) (*Message, error) {
 		sr, err := l.Search(searchRequest)
 		if err != nil {
 			log.Fatal(err)
-		}
-		fmt.Printf("post-search")
+		}*/
+		
+		
 		given_attrs:=[]string{name}
-		for _, entry := range sr.Entries {
-			for _, att := range attrlist {
-				fmt.Printf("%s: %v\n", entry.DN, entry.GetAttributeValue(att))
-				if string(entry.GetAttributeValue(att))!="" {
-					given_attrs=append(given_attrs,string(entry.GetAttributeValue(att))+"@"+parts[1])
-				}
+		for _, att := range attrlist {
+			fmt.Printf("%s: %v\n", propEntry.DN, propEntry.GetAttributeValue(att))
+			if string(propEntry.GetAttributeValue(att))!="" {
+				given_attrs=append(given_attrs,string(propEntry.GetAttributeValue(att))+"@"+parts[1])
 			}
-			
 		}
+			
+		
 
 		if (len(given_attrs)>1){
 			userattrs:=abe.NewRandomUserkey(given_attrs[0], given_attrs[1], authprv)
