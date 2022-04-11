@@ -79,6 +79,7 @@ RUN cp /mosaic/sclient_side/ct1 /mosaic/new_files
 RUN cp /mosaic/sclient_side/ct2 /mosaic/new_files
 RUN cp /mosaic/sclient_side/sig_master_pub.json /mosaic/new_files
 RUN cp /mosaic/sclient_side/org.json /mosaic/new_files
+RUN cp /mosaic/sclient_side/kk@org1.json /mosaic/new_files
 #WORKDIR /mosaic/sclient_side/RPI_Registration
 #RUN go run Registration.go
 WORKDIR /mosaic
