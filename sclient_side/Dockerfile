@@ -2,6 +2,10 @@ FROM centos:latest
 MAINTAINER Marcello Paris <marcello.paris@gmail.com>
 
 RUN mkdir /source
+RUN cd /etc/yum.repos.d/
+RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+RUN sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+RUN yum update -y
 
 RUN yum install -y \
     epel-release
@@ -10,7 +14,7 @@ RUN yum install -y \
     net-tools pciutils htop wget unzip git telnet which tar lzip
 
 RUN yum install -y \
-    make autoconf automake libtool gcc clang cmake3
+    make autoconf automake libtool gcc clang cmake
 
 RUN yum install -y \
     flex bison
@@ -22,14 +26,13 @@ RUN python3 -m pip install --upgrade pip setuptools
 
 # building z3 from sources
 RUN cd /source && \
-    wget https://github.com/Z3Prover/z3/archive/z3-4.8.7.tar.gz && \
-    tar xvf z3-4.8.7.tar.gz && \
-    cd z3-z3-4.8.7 && \
+    wget https://github.com/Z3Prover/z3/archive/z3-4.8.15.tar.gz && \
+    tar xvf z3-4.8.15.tar.gz && \
+    cd z3-z3-4.8.15 && \
     python3 scripts/mk_make.py && \
     cd build && \
     make -j 8 && make install && \
-    rm -rf /source/z3-z3-4.8.7
-
+    rm -rf /source/z3-z3-4.8.15
 # building gmp from sources
 #RUN cd /source && \
 #    wget https://gmplib.org/download/gmp/gmp-6.2.0.tar.lz && \
@@ -48,8 +51,8 @@ RUN cd /source && \
 #    echo "/usr/local/lib" > /etc/ld.so.conf.d/pbc.conf && ldconfig -v && \
 #    rm -rf /source/pbc-0.5.14
 
-RUN wget https://dl.google.com/go/go1.14.2.linux-amd64.tar.gz && \
-    tar -C /usr/local -xzf go1.14.2.linux-amd64.tar.gz
+RUN wget https://dl.google.com/go/go1.17.3.linux-amd64.tar.gz && \
+    tar -C /usr/local -xzf go1.17.3.linux-amd64.tar.gz
 
 RUN yum install -y \
     redis
@@ -72,9 +75,14 @@ ADD ./sclient_side /mosaic/sclient_side
 RUN mkdir /mosaic/new_files
 RUN mkdir /mosaic/new_files/user_keys
 RUN cp /mosaic/sclient_side/attributes /mosaic/new_files
+RUN cp /mosaic/sclient_side/ciphertext.json /mosaic/new_files
 RUN cp /mosaic/sclient_side/sig_master_pub.json /mosaic/new_files
 RUN cp /mosaic/sclient_side/org.json /mosaic/new_files
-RUN cp /mosaic/sclient_side/kk@org1.json /mosaic/new_files
+RUN cp /mosaic/sclient_side/kk@org1.json /mosaic/new_files/user_keys
+RUN cp /mosaic/sclient_side/seedkey /mosaic/new_files/seedkey
+
 WORKDIR /mosaic
+RUN go get github.com/xlzd/gotp
 
 CMD ["/bin/bash"]
+
