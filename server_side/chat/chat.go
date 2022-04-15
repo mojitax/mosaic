@@ -18,7 +18,6 @@ type Server struct {
 
 type Auth struct {
 	ID      string `json:"ID"`
-	Indexes []int  `json:"indexes"`
 	TOTP    string `json:"TOTP"`
 	Attributes []string `json:"Attributes"`
 }
@@ -89,28 +88,38 @@ func (s *Server) SayHello(ctx context.Context, in *Message) (*Message, error) {
 			log.Fatal(err)
 		}
 		
-		name:="kk@org1"//im_message.ID
+		name:=in_message.ID//im_message.ID
 		parts := strings.Split(name, "@")
 		attrlist:=[]string{}
 		attrlist=append(attrlist, attr_array...)
-		err = l.Bind( name, in_message.TOTP)
+		
 		sr:="{\"ID\":\"kk@org1\",\"attributes\":[{\"name\":\"miasto\",\"value\":\"warszawa\"},{\"name\":\"ulica\",\"value\":\"nowa\"},{\"name\":\"imie\",\"value\":\"krzysztof\"}]}"
 		testEntry:=new(JEntry)
 	   	json.Unmarshal([]byte(sr), testEntry)
+		fmt.Println(name)
+		fmt.Println(in_message.TOTP)
+		err = l.Bind( name, in_message.TOTP)
 		propEntry:=convertToEntry(testEntry)	
 		if err != nil {
 			fmt.Println("Can't bind to LDAP, running example mode")
 		} else {
-			searchRequest := ldap.NewSearchRequest(
-				"org1", // The base dn to search
+			/*searchRequest := ldap.NewSearchRequest(
+				"aaa", // The base dn to search
 				ldap.ScopeWholeSubtree, 0, 0, 0, false,
-				fmt.Sprintf("(name=%s)", name),
+				fmt.Sprintf("(uid=%s)", ldap.EscapeFilter(name)),
+				attrlist,                    // A list attributes to retrieve
+				nil,
+			)*/
+			searchRequest := ldap.NewSearchRequest(
+				"ou=Users,dc=WSO2,dc=ORG", // The base dn to search
+				ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
+				"(name=kk23@org2)", // The filter to apply
 				attrlist,                    // A list attributes to retrieve
 				nil,
 			)
-			fmt.Printf("pre-search")
 			sres, err := l.Search(searchRequest)
-			propEntry=sres.Entries[0]
+			sres.Print()
+			//propEntry=sres.Entries[0]
 			if err != nil {
 			log.Fatal(err)
 			}
